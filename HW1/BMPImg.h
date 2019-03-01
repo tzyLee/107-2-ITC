@@ -61,6 +61,10 @@ class BMPHead { // Works for memory alignment i, i == 2 ** n, n > 1 (such that t
 class BMPImg {
 private:
     BMPHead header;
+    inline unsigned _ind(unsigned h, unsigned w, unsigned c) const {
+        return 3 * (header.Width * h + w) + c; // Only works for RGB[8, 8, 8]
+    }
+    inline unsigned _ind(unsigned h, unsigned w) const { return 3 * (header.Width * h + w); }
 public:
     unsigned char* data;
 
@@ -91,9 +95,7 @@ public:
         return true;
     }
 
-    void printHeader() const {
-        std::cout << header;
-    }
+    void printHeader() const { std::cout << header; }
     
     bool storePic(const std::string& outPath) {
         std::ofstream picOut(outPath.c_str(), std::ofstream::out | std::ios::binary);
@@ -108,9 +110,9 @@ public:
         int index = 0;
         for(unsigned i=0; i<header.Width; ++i)
             for(int j=header.Height-1; j>=0; --j) {
-                temp[index++] = data[3 * (header.Width * j + i) + 0];
-                temp[index++] = data[3 * (header.Width * j + i) + 1];
-                temp[index++] = data[3 * (header.Width * j + i) + 2];
+                temp[index++] = data[_ind(j, i, 0)];
+                temp[index++] = data[_ind(j, i, 1)];
+                temp[index++] = data[_ind(j, i, 2)];
             }
         delete[] data;
         data = temp;
@@ -133,21 +135,22 @@ public:
         // Convert image to grayscale
         RGB2Y();
         unsigned char* temp = new unsigned char [getPxlNum() * getBytesPerPixel()];
+        unsigned lastHeight = header.Height - 1, lastWidth = header.Width - 1;
         for(unsigned i=0; i<header.Width; ++i) {
             temp[3 * i] = temp[3 * i + 1] = temp[3 * i + 2] = 255;
-            temp[3 * (header.Width * (header.Height - 1) + i)] = temp[3 * (header.Width * (header.Height - 1) + i) + 1] = temp[3 * (header.Width * (header.Height - 1) + i) + 2] = 255;
+            temp[_ind(lastHeight, i, 0)] = temp[_ind(lastHeight, i, 1)] = temp[_ind(lastHeight, i, 2)] = 255;
         }
         for(unsigned i=1; i<header.Height; ++i) {
             temp[3 * (header.Width * i)] = temp[3 * (header.Width * i) + 1] = temp[3 * (header.Width * i) + 2] = 255; // First column
-            temp[3 * (header.Width * i + header.Width-1)] = temp[3 * (header.Width * i + header.Width-1) + 1] = temp[3 * (header.Width * i + header.Width-1) + 2] = 255; // Last column
+            temp[_ind(i, lastWidth, 0)] = temp[_ind(i, lastWidth, 1)] = temp[_ind(i, lastWidth, 2)] = 255; // Last column
         }
-        for(unsigned i=1; i<header.Height-1; ++i)
+        for(unsigned i=1; i<lastHeight; ++i)
             for(unsigned j=1; j<header.Width-1; ++j) {
-                double g_x = data[3 * (header.Width * (i-1) + (j+1))] + data[3 * (header.Width * i + (j+1))] + data[3 * (header.Width * (i+1) + (j+1))]
-                           - data[3 * (header.Width * (i-1) + (j-1))] - data[3 * (header.Width * i + (j-1))] - data[3 * (header.Width * (i+1) + (j-1))];
-                double g_y = data[3 * (header.Width * (i-1) + (j-1))] + data[3 * (header.Width * (i-1) + j)] + data[3 * (header.Width * (i-1) + (j+1))]
-                           - data[3 * (header.Width * (i+1) + (j-1))] - data[3 * (header.Width * (i+1) + j)] - data[3 * (header.Width * (i+1) + (j+1))];
-                temp[3 * (i*header.Width + j)] = temp[3 * (i*header.Width + j) + 1] = temp[3 * (i*header.Width + j) + 2] = std::hypot(g_x, g_y);
+                double g_x = data[_ind(i+1, j+1)] + data[_ind(i, j+1)] + data[_ind(i+1, j+1)]
+                           - data[_ind(i-1, j-1)] - data[_ind(i, j-1)] - data[_ind(i+1, j-1)];
+                double g_y = data[_ind(i-1, j-1)] + data[_ind(i-1, j)] + data[_ind(i-1, j+1)]
+                           - data[_ind(i+1, j-1)] - data[_ind(i+1, j)] - data[_ind(i+1, j+1)];
+                temp[_ind(i, j, 0)] = temp[_ind(i, j, 1)] = temp[_ind(i, j, 2)] = std::hypot(g_x, g_y);
             }
         delete[] data;
         data = temp;
