@@ -78,51 +78,31 @@ private:
 public:
 	unsigned char* data;
 
-	int getWidth() const {
-		return header.Width;
-	}
-	int getHeight() const {
-		return header.Height;
-	}
-	int getPxlNum() const {
-		return header.Width * header.Height;
-	}
-	int getBytesPerPixel() const {
-		return header.BitsPerPixel / 8;
-	}
+	int getWidth() const { return header.Width; }
+	int getHeight() const { return header.Height; }
+	int getPxlNum() const { return header.Width * header.Height; }
+	int getBytesPerPixel() const { return header.BitsPerPixel / 8; }
 
-	BMPImg() {
-	}
-	BMPImg(string picPath) {
-		loadPic(picPath);
-	}
-	~BMPImg() {
-		delete[] data;
-	}
+	BMPImg() = delete;
+	BMPImg(string picPath) { loadPic(picPath); }
+	~BMPImg() { delete[] data; }
 
 	void copyHead(const BMPImg& ori) {
-		for (int i = 0; i < headerNum; ++i) {
-			if (headerSize[i] == 4)
-				*((unsigned int*) (header.pFlag(i))) =
-						*((unsigned int*) (ori.header.pFlag(i)));
-			else
-				*((unsigned short*) (header.pFlag(i))) =
-						*((unsigned short*) (ori.header.pFlag(i)));
-		}
+		header = ori.header;
+		if(data)
+			delete[] data;
 		data = new unsigned char[getPxlNum() * getBytesPerPixel()];
 	}
 
 	bool loadPic(string picPath) {
-		ifstream pic;
-		pic.open(picPath.c_str(), ios::in | ios::binary);
-        
+		std::ifstream pic(picPath.c_str(), std::ios::in | std::ios::binary);
 		for (int i = 0; i < headerNum; ++i) {
-			pic.read((char*) (header.pFlag(i)), headerSize[i]);
+			pic.read(reinterpret_cast<char *>(header.pFlag(i)), headerSize[i]);
 		}
 		int dataSize = getPxlNum() * getBytesPerPixel();
 		data = new unsigned char[dataSize];
-		pic.read((char*) data, dataSize);
-        
+		pic.read(reinterpret_cast<char *>(data), dataSize);
+        pic.close();
 		return true;
 	}
 
@@ -144,14 +124,12 @@ public:
 
 	
 	bool storePic(string outPath) {
-		ofstream picOut;
-		picOut.open(outPath.c_str(), ios::out | ios::binary);
+		std::ofstream picOut(outPath.c_str(), std::ofstream::out | std::ios::binary);
 		for (int i = 0; i < headerNum; ++i) {
-			picOut.write((char*) (header.pFlag(i)), headerSize[i]);
+			picOut.write(reinterpret_cast<char *>(header.pFlag(i)), headerSize[i]);
 		}
-		picOut.write((char*) data, getPxlNum() * getBytesPerPixel());
+		picOut.write(reinterpret_cast<char *>(data), getPxlNum() * getBytesPerPixel());
 		picOut.close();
-
 		return true;
 	}
 
@@ -164,8 +142,7 @@ public:
     }
 
 	bool PrewittFilter() {
-
-		//Convert image to grayscale
+		// Convert image to grayscale
 		RGB2Y();
 	}
 
