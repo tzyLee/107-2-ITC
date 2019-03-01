@@ -7,10 +7,8 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <iomanip>
 #include <string>
 #include <utility>
-#include <vector>
 
 static uint_fast8_t headerSize[] = {4,4,4, 4,4,4,2,2,4,4,4,4,4,4};
 static const std::array<const char*, 14> headerInfo = { "FileSize", "Reserved", "BitmapDataOffset",
@@ -19,30 +17,30 @@ static const std::array<const char*, 14> headerInfo = { "FileSize", "Reserved", 
                                                         "V_Resolution", "UsedColors", "ImportantColors"};
 
 
-class BMPHead {
-    friend class BMPImg;
+class BMPHead { // Works for memory alignment i, i == 2 ** n, n > 1 (such that the memory layout of this class is continuous)
+    friend class BMPImg; // Not storing BM, 1. This class is intended for BMP files, 2. Memory alignment
     uint32_t FileSize, Reserved, BitmapDataOffset;
 
     uint32_t BitmapHeaderSize, Width, Height;
     uint16_t Planes, BitsPerPixel;
     uint32_t Compression, BitmapDataSize, H_Resolution, V_Resolution, UsedColors, ImportantColors;
-    bool load(std::istream& pic) {
+    bool load(std::istream& pic) { // Assume file is in binary mode
         char Identifier[2];
         pic.read(Identifier, 2);
-        if(std::strcmp("BM", Identifier) != 0)
+        if(std::strcmp("BM", Identifier) != 0) // Check for file type
             return false;
         return static_cast<bool>(pic.read(reinterpret_cast<char *>(this), sizeof(BMPHead)));
     }
-    bool save(std::ostream& file) {
+    bool save(std::ostream& file) { // Assume file is in binary mode
         file << "BM";
         return static_cast<bool>(file.write(reinterpret_cast<char *>(this), sizeof(BMPHead)));
     }
     friend std::ostream& operator<<(std::ostream& os, const BMPHead& header) {
-        os << std::setw(18) << "Identifier" << ": BM\n";
+        os << "Identifier:BM\n";
         uint_fast8_t* infoSize = headerSize;
-        uint8_t* temp = reinterpret_cast<uint8_t *>(const_cast<BMPHead *>(&header));
+        uint8_t* temp = reinterpret_cast<uint8_t *>(const_cast<BMPHead *>(&header)); // Move 1 byte when +1
         for(const auto& info : headerInfo) {
-            os << std::setw(18) << info << ": ";
+            os << info << ':';
             switch(*(infoSize++)) {
                 case 4:
                     std::cout << *reinterpret_cast<uint32_t *>(temp);
@@ -77,7 +75,7 @@ public:
 
     void copyHead(const BMPImg& ori) {
         header = ori.header;
-        if(data)
+        if(data) // Prevent potential memory leak
             delete[] data;
         data = new unsigned char[getPxlNum() * getBytesPerPixel()];
     }
@@ -108,7 +106,7 @@ public:
     bool rotate() {
         unsigned char* temp = new unsigned char [getPxlNum() * getBytesPerPixel()];
         int index = 0;
-        for(int i=0; i<header.Width; ++i)
+        for(unsigned i=0; i<header.Width; ++i)
             for(int j=header.Height-1; j>=0; --j) {
                 temp[index++] = data[3 * (header.Width * j + i) + 0];
                 temp[index++] = data[3 * (header.Width * j + i) + 1];
@@ -122,8 +120,8 @@ public:
     }
     
     bool RGB2Y() {
-        auto BPP = getBytesPerPixel();
-        for(unsigned i=0; i<getPxlNum()*getBytesPerPixel(); i += BPP) {
+        unsigned bpp = getBytesPerPixel(), len = getPxlNum() * bpp;
+        for(unsigned i=0; i<len; i += bpp) {
             unsigned char* pixelValue = &data[i];
             unsigned char greyValue = 0.3*pixelValue[2] + 0.59*pixelValue[1] + 0.11*pixelValue[0];
             pixelValue[0] = pixelValue[1] = pixelValue[2] = greyValue;
@@ -135,16 +133,16 @@ public:
         // Convert image to grayscale
         RGB2Y();
         unsigned char* temp = new unsigned char [getPxlNum() * getBytesPerPixel()];
-        for(int i=0; i<header.Width; ++i) {
+        for(unsigned i=0; i<header.Width; ++i) {
             temp[3 * i] = temp[3 * i + 1] = temp[3 * i + 2] = 255;
             temp[3 * (header.Width * (header.Height - 1) + i)] = temp[3 * (header.Width * (header.Height - 1) + i) + 1] = temp[3 * (header.Width * (header.Height - 1) + i) + 2] = 255;
         }
-        for(int i=1; i<header.Height; ++i) {
+        for(unsigned i=1; i<header.Height; ++i) {
             temp[3 * (header.Width * i)] = temp[3 * (header.Width * i) + 1] = temp[3 * (header.Width * i) + 2] = 255; // First column
             temp[3 * (header.Width * i + header.Width-1)] = temp[3 * (header.Width * i + header.Width-1) + 1] = temp[3 * (header.Width * i + header.Width-1) + 2] = 255; // Last column
         }
-        for(int i=1; i<header.Height-1; ++i)
-            for(int j=1; j<header.Width-1; ++j) {
+        for(unsigned i=1; i<header.Height-1; ++i)
+            for(unsigned j=1; j<header.Width-1; ++j) {
                 double g_x = data[3 * (header.Width * (i-1) + (j+1))] + data[3 * (header.Width * i + (j+1))] + data[3 * (header.Width * (i+1) + (j+1))]
                            - data[3 * (header.Width * (i-1) + (j-1))] - data[3 * (header.Width * i + (j-1))] - data[3 * (header.Width * (i+1) + (j-1))];
                 double g_y = data[3 * (header.Width * (i-1) + (j-1))] + data[3 * (header.Width * (i-1) + j)] + data[3 * (header.Width * (i-1) + (j+1))]
