@@ -1,9 +1,10 @@
 #ifndef __BMPIMG_H__
 #define __BMPIMG_H__
 
-#include<iostream>
-#include<string>
-#include<fstream>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -134,11 +135,28 @@ public:
 	}
 
 	bool rotate() {
-        
+		unsigned char* temp = new unsigned char [getPxlNum() * getBytesPerPixel()];
+		int index = 0;
+		for(int i=0; i<header.Width; ++i)
+			for(int j=header.Height-1; j>=0; --j) {
+				temp[index++] = data[3 * (header.Width * j + i) + 0];
+				temp[index++] = data[3 * (header.Width * j + i) + 1];
+				temp[index++] = data[3 * (header.Width * j + i) + 2];
+			}
+		delete[] data;
+		data = temp;
+		std::swap(header.Width, header.Height);
+		std::swap(header.H_Resolution, header.V_Resolution);
     }
     
     bool RGB2Y() {
-        
+		auto BPP = getBytesPerPixel();
+		for(unsigned i=0; i<getPxlNum()*getBytesPerPixel(); i += BPP) {
+            unsigned char* pixelValue = &data[i];
+            unsigned char greyValue = 0.3*pixelValue[2] + 0.59*pixelValue[1] + 0.11*pixelValue[0];
+            pixelValue[0] = pixelValue[1] = pixelValue[2] = greyValue;
+        }
+        return true;
     }
 
 	bool PrewittFilter() {

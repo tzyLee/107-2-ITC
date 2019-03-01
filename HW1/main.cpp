@@ -6,6 +6,9 @@ int main(int argc, char* argv[]) {
 	BMPImg imgrabbit("./img/rabbit.bmp");
 	imgrabbit.rotate();
 	imgrabbit.storePic("./output/rabbit_ans.bmp");
+	BMPImg aaa("./result.bmp");
+	aaa.rotate();
+	aaa.storePic("./result_rotated.bmp");
 
 	BMPImg imgflower("./img/flower.bmp");
 	imgflower.PrewittFilter();
@@ -15,3 +18,9 @@ int main(int argc, char* argv[]) {
 }
 
 
+template<size_t width, size_t height, class ValueType = unsigned char>
+union PixelArray{
+	ValueType flatten[width*height*3];
+	ValueType data[width][height][3];
+	ValueType transposed[height][width][3];
+};
