@@ -148,7 +148,7 @@ public:
         }
         for(unsigned i=1; i<lastHeight; ++i)
             for(unsigned j=1; j<lastWidth; ++j) {
-                double g_x = data[_ind(i+1, j+1)] + data[_ind(i, j+1)] + data[_ind(i+1, j+1)]
+                double g_x = data[_ind(i-1, j+1)] + data[_ind(i, j+1)] + data[_ind(i+1, j+1)]
                            - data[_ind(i-1, j-1)] - data[_ind(i, j-1)] - data[_ind(i+1, j-1)];
                 double g_y = data[_ind(i-1, j-1)] + data[_ind(i-1, j)] + data[_ind(i-1, j+1)]
                            - data[_ind(i+1, j-1)] - data[_ind(i+1, j)] - data[_ind(i+1, j+1)];

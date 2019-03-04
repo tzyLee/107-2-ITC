@@ -26,16 +26,20 @@ def main():
         numpy = prewitt_numpy(arr)
         cv2 = prewitt_cv2(arr)
         # Compare cpp and cv2
-        compare(cv2, cpp)
+        compare(cv2, cpp[:, :, 0])
+        compare(cv2, scipy_ndimage)
+        compare(cv2, scipy)
+        compare(cv2, scipy_complex)
+        compare(cv2, numpy)
         show_array((2, 3), cpp, scipy_ndimage, scipy, scipy_complex, numpy, cv2,
                         titles=("cpp", "scipy_ndimage", "scipy", "scipy_complex", "numpy", "cv2"))
 
 def compare(ref, to_test):
     ref = ref.astype(np.int32, casting='safe')
-    print("flower.bmp test passed:", np.all(ref == to_test[:, :, 0]))
-    print("mean(abs(error)):", np.mean(np.abs(ref-to_test[:, :, 0])))
-    print("max(abs(error)):", np.max(np.abs(ref-to_test[:, :, 0])))
-    # plt.imshow(Image.fromarray(np.abs(ref-to_test[:, :, 0])))
+    print("flower.bmp test passed:", np.all(ref == to_test))
+    print("mean(abs(error)):", np.mean(np.abs(ref-to_test)))
+    print("max(abs(error)):", np.max(np.abs(ref-to_test)))
+    # plt.imshow(Image.fromarray(np.abs(ref-to_test)))
 
 def array_to_image(arr):
     if type(arr) is np.ndarray:
