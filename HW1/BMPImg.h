@@ -1,6 +1,7 @@
 #ifndef __BMPIMG_H__
 #define __BMPIMG_H__
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -125,7 +126,8 @@ public:
         unsigned bpp = getBytesPerPixel(), len = getPxlNum() * bpp;
         for(unsigned i=0; i<len; i += bpp) {
             unsigned char* pixelValue = &data[i];
-            unsigned char greyValue = 0.3*pixelValue[2] + 0.59*pixelValue[1] + 0.11*pixelValue[0];
+            unsigned char greyValue = (30*pixelValue[2] + 59*pixelValue[1] + 11*pixelValue[0])/100;
+            // unsigned char greyValue = (299*pixelValue[2] + 587*pixelValue[1] + 114*pixelValue[0])/1000;
             pixelValue[0] = pixelValue[1] = pixelValue[2] = greyValue;
         }
         return true;
@@ -145,12 +147,12 @@ public:
             temp[_ind(i, lastWidth, 0)] = temp[_ind(i, lastWidth, 1)] = temp[_ind(i, lastWidth, 2)] = 255; // Last column
         }
         for(unsigned i=1; i<lastHeight; ++i)
-            for(unsigned j=1; j<header.Width-1; ++j) {
+            for(unsigned j=1; j<lastWidth; ++j) {
                 double g_x = data[_ind(i+1, j+1)] + data[_ind(i, j+1)] + data[_ind(i+1, j+1)]
                            - data[_ind(i-1, j-1)] - data[_ind(i, j-1)] - data[_ind(i+1, j-1)];
                 double g_y = data[_ind(i-1, j-1)] + data[_ind(i-1, j)] + data[_ind(i-1, j+1)]
                            - data[_ind(i+1, j-1)] - data[_ind(i+1, j)] - data[_ind(i+1, j+1)];
-                temp[_ind(i, j, 0)] = temp[_ind(i, j, 1)] = temp[_ind(i, j, 2)] = std::hypot(g_x, g_y);
+                temp[_ind(i, j, 0)] = temp[_ind(i, j, 1)] = temp[_ind(i, j, 2)] = std::min(std::hypot(g_x, g_y), 255.0);
             }
         delete[] data;
         data = temp;
