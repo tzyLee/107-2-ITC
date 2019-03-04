@@ -1,119 +1,99 @@
-HEADER_NUM = 15;
-HEADER_SIZE = [2,4,4,4,4,4,4,2,2,4,4,4,4,4,4];
-HEADER_INFO = ["Identifier","FileSize","Reserved","BitmapDataOffset",
-               "BitmapHeaderSize","Width","Height","Planes",
-               "BitsPerPixel","Compression","BitmapDataSize","H_Resolution",
-               "V_Resolution","UsedColors","ImportantColors"];
+from struct import Struct, calcsize
+from math import hypot
+from array import array
 
 class BMPHead:
-    def __init__(self):
-        self.Identifier = '';
-        self.FileSize = 0;
-        self.Reserved = 0;
-        self.BitmapDataOffset = 0;
-        self.BitmapHeaderSize = 0;
-        self.Width = 0;
-        self.Height = 0;
-        self.Planes = 0;
-        self.BitsPerPixel = 0;
-        self.Compression = 0;
-        self.BitmapDataSize = 0;
-        self.H_Resolution = 0;
-        self.V_Resolution = 0;
-        self.UsedColors = 0;
-        self.ImportantColors = 0;
+    HEADER_SIZE = [2,4,4,4,4,4,4,2,2,4,4,4,4,4,4]
+    __slots__ = ("Identifier", "FileSize", "Reserved", "BitmapDataOffset",
+               "BitmapHeaderSize", "Width", "Height", "Planes",
+               "BitsPerPixel", "Compression", "BitmapDataSize", "H_Resolution",
+               "V_Resolution", "UsedColors", "ImportantColors")
+    struct = Struct(''.join('H' if i == 2 else 'I' for i in HEADER_SIZE[1:]))
 
+    def load(self, file):
+        assert 'b' in file.mode and file.readable(), "File is not opened in binary mode or not readable"
+        self.Identifier = file.read(2).decode('ascii')
+        res = self.struct.unpack(file.read(sum(self.HEADER_SIZE) - 2))
+        for key, value in zip(self.__slots__[1:], res):
+            setattr(self, key, value)
+    
+    def save(self, file):
+        assert 'b' in file.mode and file.writable(), "File is not opened in binary mode or not writable"
+        file.write(self.Identifier.encode('ascii'))
+        file.write(self.struct.pack(*(getattr(self, i) for i in self.__slots__[1:])))
+    
+    def __iter__(self):
+        return map(lambda i: (i, getattr(self, i)), self.__slots__)
 
+class PixelArray:
+    def __init__(self, array, width=None):
+        self.array = array
+        self.width = width
+    
+    def __getitem__(self, index):
+        if type(index) is tuple:
+            ret = 3*(self.width*index[0] + index[1])
+            if len(index) == 3:
+                ret += index[2]
+            return self.array[ret]
+        else:
+            return self.array[index]
+
+    def __setitem__(self, index, value):
+        if type(index) is tuple:
+            ret = 3*(self.width*index[0] + index[1])
+            if len(index) == 3:
+                ret += index[2]
+            self.array[ret] = value
+        else:
+            self.array[index] = value
 class BMPImg:
     def __init__(self):
-        self.header = BMPHead();
-        self.data = "";
+        self.header = BMPHead()
+        self.data = PixelArray(array('B'))
     
     def loadPic(self, picPath):
-        pic = open(picPath, 'rb');
-        
-        for i in range(HEADER_NUM):
-            a = pic.read(HEADER_SIZE[i]);
-            self.header.setValue(i, a);
-    
-        dataSize =     self.getPxlNum() * self.getBytesPerPixel();
-        self.data = pic.read(int(dataSize));
-
-        pic.close();
-            
-    def getWidth(self):
-        return self.header.getWidth();
-    
-    def getHeight(self):
-        return self.header.getHeight();
-    
-    def getPxlNum(self):
-        return self.header.getWidth() * self.header.getHeight();
+        with open(picPath, 'rb') as pic:
+            self.header.load(pic)
+            self.data.width = self.header.Width
+            dataSize = self.header.Width * self.header.Height * (self.header.BitsPerPixel // 8)
+            self.data.array.fromfile(pic, dataSize)
     
     def getBytesPerPixel(self):
-        return self.header.getBitsPerPixel() / 8;
+        return self.header.BitsPerPixel // 8
     
     def printHeader(self):
-        getDict = {
-            "Identifier": self.header.Identifier,
-            "FileSize": self.header.FileSize,
-            "Reserved": self.header.Reserved,
-            "BitmapDataOffset": self.header.BitmapDataOffset,
-            "BitmapHeaderSize": self.header.BitmapHeaderSize,
-            "Width": self.header.Width,
-            "Height": self.header.Height,
-            "Planes": self.header.Planes,
-            "BitsPerPixel": self.header.BitsPerPixel,
-            "Compression": self.header.Compression,
-            "BitmapDataSize": self.header.BitmapDataSize,
-            "H_Resolution": self.header.H_Resolution,
-            "V_Resolution": self.header.V_Resolution,
-            "UsedColors": self.header.UsedColors,
-            "ImportantColors": self.header.ImportantColors
-        }
-        
-        for h in HEADER_INFO:
-            print(h+":", getDict[h]);
+        for key, value in self.header:
+            print(key, ": ", value, sep='')
 
     def storePic(self, outputPath):
-        getDict = {
-            "Identifier": self.header.Identifier,
-            "FileSize": self.header.FileSize,
-            "Reserved": self.header.Reserved,
-            "BitmapDataOffset": self.header.BitmapDataOffset,
-            "BitmapHeaderSize": self.header.BitmapHeaderSize,
-            "Width": self.header.Width,
-            "Height": self.header.Height,
-            "Planes": self.header.Planes,
-            "BitsPerPixel": self.header.BitsPerPixel,
-            "Compression": self.header.Compression,
-            "BitmapDataSize": self.header.BitmapDataSize,
-            "H_Resolution": self.header.H_Resolution,
-            "V_Resolution": self.header.V_Resolution,
-            "UsedColors": self.header.UsedColors,
-            "ImportantColors": self.header.ImportantColors
-        }
-        
-        self.header.updateGetDict();
-        pic = open(outputPath, 'wb');
-        for h in HEADER_INFO:
-            pic.write(getDict[h]);
-        pic.write(self.data);
-        pic.close();
+        with open(outputPath, 'wb') as pic:
+            self.header.save(pic)
+            self.data.array.tofile(pic)
         print("--- Store Picture ---")
-
         
     def rotate(self):
-        print("--- rotate ---")
-        #TODO
+        print("--- Rotate ---")
+        arr = [self.data[j, i, k] for i in range(self.header.Width) for j in reversed(range(self.header.Height)) for k in range(3)]
+        temp = PixelArray(array('B', arr), self.header.Width)
+        self.data = temp
+        self.header.Width, self.header.Height = self.header.Height, self.header.Width
         
     def RGB2Y(self):
         print("--- RGB to Y ---")
-        #TODO
+        for i in range(len(self.data.array)//3):
+            self.data[3*i] = self.data[3*i+1] = self.data[3*i+2] = \
+                int(0.299*self.data[3*i+2] + 0.587*self.data[3*i+1] + 0.114*self.data[3*i])
     
     def PrewittFilter(self):
-        
-        #Convert image to grayscale
-        self.RGB2Y();
+        """Convert image to grayscale"""
+        self.RGB2Y()
         print("--- PrewittFilter ---")
-    #TODO: bonus
+        temp = PixelArray(array('B', b'\xFF'*len(self.data.array)), self.header.Width)
+        data = self.data
+        for i in range(1, self.header.Height-1):
+            for j in range(1, self.header.Width-1):
+                g_x = data[i-1, j+1] + data[i, j+1] + data[i+1, j+1] - data[i-1, j-1] - data[i, j-1] - data[i+1, j-1]
+                g_y = data[i-1, j-1] + data[i-1, j] + data[i-1, j+1] - data[i+1, j-1] - data[i+1, j] - data[i+1, j+1]
+                temp[i, j, 0] = temp[i, j, 1] = temp[i, j, 2] = min(round(hypot(g_x, g_y)), 255)
+        self.data = temp
