@@ -125,10 +125,8 @@ public:
     bool RGB2Y() {
         unsigned bpp = getBytesPerPixel(), len = getPxlNum() * bpp;
         for(unsigned i=0; i<len; i += bpp) {
-            unsigned char* pixelValue = &data[i];
-            unsigned char greyValue = (30*pixelValue[2] + 59*pixelValue[1] + 11*pixelValue[0])/100;
-            // unsigned char greyValue = (299*pixelValue[2] + 587*pixelValue[1] + 114*pixelValue[0])/1000;
-            pixelValue[0] = pixelValue[1] = pixelValue[2] = greyValue;
+            data[i] = data[i+1] = data[i+2] = (30*data[i+2] + 59*data[i+1] + 11*data[i])/100;
+            // data[i] = data[i+1] = data[i+2] = (299*data[i+2] + 587*data[i+1] + 114*data[i])/1000;
         }
         return true;
     }
