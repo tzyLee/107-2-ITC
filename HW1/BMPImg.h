@@ -89,6 +89,10 @@ public:
         std::ifstream pic(picPath.c_str(), std::ios::in | std::ios::binary);
         if(!pic || !header.load(pic))
             return false;
+        auto offset = header.BitmapDataOffset;
+        if(offset > sizeof(BMPHead) + 2) { // +2 for "BM"
+            pic.seekg(offset - sizeof(BMPHead) - 2, std::ios_base::cur);
+        }
         int dataSize = getPxlNum() * getBytesPerPixel();
         data = new unsigned char[dataSize];
         pic.read(reinterpret_cast<char *>(data), dataSize);
