@@ -122,7 +122,6 @@ public:
         delete[] data;
         data = temp;
         std::swap(header.Width, header.Height);
-        std::swap(header.H_Resolution, header.V_Resolution);
         return true;
     }
     
