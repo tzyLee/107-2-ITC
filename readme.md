@@ -2,6 +2,7 @@
 
 ## Requirements
 - BMP files
+
   | Header           | Value |
   | ---------------- | ----- |
   | Plane            | 1     |
