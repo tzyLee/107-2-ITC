@@ -1,73 +1,61 @@
 #ifndef __BMPIMG_H__
 #define __BMPIMG_H__
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <utility>
 
-static const int headerNum = 15;
-static const int headerSize[] = {2,4,4,4,4,4,4,2,2,4,4,4,4,4,4};
-static const char* headerInfo[] = { "Identifier", "FileSize",
-        "Reserved", "BitmapDataOffset", "BitmapHeaderSize", "Width", "Height",
-        "Planes", "BitsPerPixel", "Compression", "BitmapDataSize",
-        "H_Resolution", "V_Resolution", "UsedColors", "ImportantColors" };
+static uint_fast8_t headerSize[] = {4,4,4, 4,4,4,2,2,4,4,4,4,4,4};
+static const std::array<const char*, 14> headerInfo = { "FileSize", "Reserved", "BitmapDataOffset",
+                                                        "BitmapHeaderSize", "Width", "Height", "Planes",
+                                                        "BitsPerPixel", "Compression", "BitmapDataSize", "H_Resolution",
+                                                        "V_Resolution", "UsedColors", "ImportantColors"};
 
-class BMPHead {
-    friend class BMPImg;
-private:
-    char Identifier[2];
-    uint32_t FileSize;
-    uint32_t Reserved;
-    uint32_t BitmapDataOffset;
-    uint32_t BitmapHeaderSize;
-    uint32_t Width;
-    uint32_t Height;
-    uint16_t Planes;
-    uint16_t BitsPerPixel;
-    uint32_t Compression;
-    uint32_t BitmapDataSize;
-    uint32_t H_Resolution;
-    uint32_t V_Resolution;
-    uint32_t UsedColors;
-    uint32_t ImportantColors;
-public:
-    void* pFlag(const int i) const { //return pointers of flags according to its order(int)
-        switch (i) {
-        default:
-        case 0:
-            return (void*) Identifier;
-        case 1:
-            return (void*) &FileSize;
-        case 2:
-            return (void*) &Reserved;
-        case 3:
-            return (void*) &BitmapDataOffset;
-        case 4:
-            return (void*) &BitmapHeaderSize;
-        case 5:
-            return (void*) &Width;
-        case 6:
-            return (void*) &Height;
-        case 7:
-            return (void*) &Planes;
-        case 8:
-            return (void*) &BitsPerPixel;
-        case 9:
-            return (void*) &Compression;
-        case 10:
-            return (void*) &BitmapDataSize;
-        case 11:
-            return (void*) &H_Resolution;
-        case 12:
-            return (void*) &V_Resolution;
-        case 13:
-            return (void*) &UsedColors;
-        case 14:
-            return (void*) &ImportantColors;
+
+class BMPHead { // Works for memory alignment i, i == 2 ** n, n > 1 (such that the memory layout of this class is continuous)
+    friend class BMPImg; // Not storing BM, 1. This class is intended for BMP files, 2. Memory alignment
+    uint32_t FileSize, Reserved, BitmapDataOffset;
+
+    uint32_t BitmapHeaderSize, Width, Height;
+    uint16_t Planes, BitsPerPixel;
+    uint32_t Compression, BitmapDataSize, H_Resolution, V_Resolution, UsedColors, ImportantColors;
+    bool load(std::istream& pic) { // Assume file is in binary mode
+        char Identifier[2];
+        pic.read(Identifier, 2);
+        if(std::strcmp("BM", Identifier) != 0) // Check for file type
+            return false;
+        return static_cast<bool>(pic.read(reinterpret_cast<char *>(this), sizeof(BMPHead)));
+    }
+    bool save(std::ostream& file) { // Assume file is in binary mode
+        file << "BM";
+        return static_cast<bool>(file.write(reinterpret_cast<char *>(this), sizeof(BMPHead)));
+    }
+    friend std::ostream& operator<<(std::ostream& os, const BMPHead& header) {
+        os << "Identifier:BM\n";
+        uint_fast8_t* infoSize = headerSize;
+        uint8_t* temp = reinterpret_cast<uint8_t *>(const_cast<BMPHead *>(&header)); // Move 1 byte when +1
+        for(const auto& info : headerInfo) {
+            os << info << ':';
+            switch(*(infoSize++)) {
+                case 4:
+                    std::cout << *reinterpret_cast<uint32_t *>(temp);
+                    temp += 4;
+                    break;
+                case 2:
+                default:
+                    std::cout << *reinterpret_cast<uint16_t *>(temp);
+                    temp += 2;
+                    break;
+            }
+            os.put('\n');
         }
+        return os.flush();
     }
 };
 
@@ -87,12 +75,8 @@ public:
     int getBytesPerPixel() const { return header.BitsPerPixel / 8; }
 
     BMPImg() = delete;
-    BMPImg(const std::string& picPath) {
-        loadPic(picPath);
-    }
-    ~BMPImg() {
-        delete[] data;
-    }
+    BMPImg(const std::string& picPath) { loadPic(picPath); }
+    ~BMPImg() { delete[] data; }
 
     void copyHead(const BMPImg& ori) {
         header = ori.header;
@@ -103,40 +87,26 @@ public:
 
     bool loadPic(const std::string& picPath) {
         std::ifstream pic(picPath.c_str(), std::ios::in | std::ios::binary);
-        if(!pic)
+        if(!pic || !header.load(pic))
             return false;
-        for (int i = 0; i < headerNum; ++i) {
-            pic.read((char*) (header.pFlag(i)), headerSize[i]);
+        auto offset = header.BitmapDataOffset;
+        if(offset > sizeof(BMPHead) + 2) { // +2 for "BM"
+            pic.seekg(offset - sizeof(BMPHead) - 2, std::ios_base::cur);
         }
         int dataSize = getPxlNum() * getBytesPerPixel();
         data = new unsigned char[dataSize];
-        pic.read((char*) data, dataSize);
+        pic.read(reinterpret_cast<char *>(data), dataSize);
+        pic.close();
         return true;
     }
 
-    void printHeader() const {
-        for (int i = 0; i < headerNum; ++i) {
-            std::cout << headerInfo[i] << ':';
-
-            if (i == 0) {
-                std::cout << header.Identifier[0] << header.Identifier[1];
-            } else {
-                if (headerSize[i] == 4)
-                    std::cout << *((unsigned int*) (header.pFlag(i)));
-                else
-                    std::cout << *((unsigned short*) (header.pFlag(i)));
-            }
-            std::cout << std::endl;
-        }
-    }
-
+    void printHeader() const { std::cout << header; }
     
     bool storePic(const std::string& outPath) {
-        std::ofstream picOut(outPath.c_str(), std::ios::out | std::ios::binary);
-        for (int i = 0; i < headerNum; ++i) {
-            picOut.write((char*) (header.pFlag(i)), headerSize[i]);
-        }
-        picOut.write((char*) data, getPxlNum() * getBytesPerPixel());
+        std::ofstream picOut(outPath.c_str(), std::ofstream::out | std::ios::binary);
+        header.save(picOut);
+        picOut.write(reinterpret_cast<char *>(data), getPxlNum() * getBytesPerPixel());
+        picOut.close();
         return true;
     }
 
@@ -165,8 +135,8 @@ public:
     }
 
     bool PrewittFilter() {
+        // Convert image to grayscale
         RGB2Y();
-        //Convert image to grayscale
         unsigned char* temp = new unsigned char [getPxlNum() * getBytesPerPixel()];
         unsigned lastHeight = header.Height - 1, lastWidth = header.Width - 1;
         for(unsigned i=0; i<header.Width; ++i) {
