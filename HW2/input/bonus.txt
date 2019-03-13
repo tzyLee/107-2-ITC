@@ -1,0 +1,11 @@
+Lb F 33
+lB 0 0a
+Add 1 0 f
+sw 1 FE
+lb 3 2a
+And 1 1 4
+LW 5 FE
+XOR 0 5 1
+srl 0 0 1
+Sw 0 FF
+halt
