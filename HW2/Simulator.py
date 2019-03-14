@@ -25,7 +25,7 @@ class Simulator:
         assert self.memory, "Memory is not loaded, call Simulator.loadMemory first!"
         print("simulate")
         self.pc = 0
-        while not self.instructions[((self.memory[self.pc] & 0xF0) >> 4) - 1](self, (self.memory[self.pc] & 0xF) << 4 | self.memory[self.pc+1]):
+        while not self.instructions[((self.memory[self.pc] & 0xF0) >> 4) - 1](self, (self.memory[self.pc] & 0xF) << 8 | self.memory[self.pc+1]):
             self.pc += 2
 
     # Helper functions
@@ -68,10 +68,11 @@ class Simulator:
     @instruction(0xF00, 0xF0, 0xF)
     # Extract 2nd bit, 3rd and 4th bit from max 0xFFFF int
     def add_signed(self, dest, a, b):
-        self.memory[dest] = (a + b) & 0xFF
+        self.registers[dest] = (self.registers[a] + self.registers[b]) & 0xFF
 
     @instruction(0xF00, 0xF0, 0xF)
     def add_float(self, dest, a, b):
+        a, b = self.registers[a], self.registers[b]
         sign_a, sign_b = (a & 1 << 7) >> 7, (b & 1 << 7) >> 7
         exp_a, exp_b = (a & 0b1110000) >> 4, (b & 0b1110000) >> 4
         man_a, man_b = a & 0b111, b & 0b111
@@ -83,24 +84,24 @@ class Simulator:
         if sign_a ^ sign_b:  # Sign are different
             # TODO do exp need to be changed?
             # TODO if == 0, sign may became 1
-            self.memory[dest] = (sign_a if man_a > man_b else sign_b) << 7 | max_exp | (
+            self.registers[dest] = (sign_a if man_a > man_b else sign_b) << 7 | max_exp | (
                 sign_a - sign_b if man_a > man_b else sign_b - sign_a)
         else:
             # TODO do exp need to be changed?
-            self.memory[dest] = sign_a << 7 | max_exp | (
+            self.registers[dest] = sign_a << 7 | max_exp | (
                 man_a + man_b) & 0b1111
 
     @instruction(0xF00, 0xF0, 0xF)
     def binary_or(self, dest, a, b):
-        self.memory[dest] = self.registers[a] | self.registers[b]
+        self.registers[dest] = self.registers[a] | self.registers[b]
 
     @instruction(0xF00, 0xF0, 0xF)
     def binary_and(self, dest, a, b):
-        self.memory[dest] = self.registers[a] & self.registers[b]
+        self.registers[dest] = self.registers[a] & self.registers[b]
 
     @instruction(0xF00, 0xF0, 0xF)
     def binary_xor(self, dest, a, b):
-        self.memory[dest] = self.registers[a] ^ self.registers[b]
+        self.registers[dest] = self.registers[a] ^ self.registers[b]
 
     @instruction(0xF00, 0xF)
     def rotate_r(self, src, times):
