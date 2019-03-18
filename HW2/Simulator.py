@@ -1,19 +1,75 @@
 _instructions = []
+_asm_name = ['lw', 'lb', 'sw', 'mv', 'add', 'addf',
+             'or', 'and', 'xor', 'srl', 'beq', 'halt']
 
 
 class Simulator:
+    class Float:
+        def __init__(self, num):
+            self.sign = num >> 7
+            self.exp = num & (0b1110000)
+            self.man = num & 0b1111
+
+        def __scale_up_exp(a, b):
+            if a.exp > b.exp:
+                b.man >>= a.exp - b.exp
+                b.exp = a.exp
+            else:
+                a.man >>= b.exp - a.exp
+                a.exp = a.exp
+
+        def __add__(self, b):
+            self.__scale_up_exp(b)
+            if self.sign == b.sign:
+                sum = self.man + b.man
+                exp = self.exp
+                # maximum 0b1111 + 0b1111 = 0b1110 (because scaled up)
+                if sum > 0b1111 and exp < 0b111:
+                    sum >>= 1  # TODO truncate may occur when last bit is not 0
+                    exp += 1
+                # if exp == 0b111, let man overflow
+                return self.sign << 7 | exp << 4 | sum & 0b1111
+                else:
+                    return self.sign << 7 | self.exp << 4 | sum & 0b1111
+            else:
+                if self.man == b.man:
+                    return 0  # TODO check this
+                else:
+                    return (self.sign if self.man > b.man else b.sign) << 7 | self.exp << 4 | abs(self.man - b.man)
+
     def __init__(self):
         print()
         if not getattr(self, 'instructions', None):
             self.instructions = _instructions
         self.memory = None
         self.registers = [0 for i in range(16)]
-        self.spc = 0
+        self.pc = 0
 
     def loadMemory(self, path):
         print("loadMemory")
         with open(path, 'rb') as file:
             self.memory = bytearray(file.read())
+
+    def loadAssembly(self, path):
+        print("loadAssembly")
+        if not getattr(self, 'asm', None):
+            self.asm = {name: index for index, name in enumerate(_asm_name, 1)}
+            print(self.asm)  # TODO
+        self.memory = bytearray(256)
+        with open(path, 'r') as file:
+            for index, line in enumerate(file):
+                code = line.lower().split(' ')
+                inst = self.asm[code[0]]
+                self.memory[2*index] = inst << 4
+                if inst == 'mv':
+                    self.memory[2*index + 1] = hex(''.join(code[1:]))
+                elif inst == 'srl':
+                    self.memory[2*index] |= hex(code[1])
+                    self.memory[2*index + 1] = hex(code[-1])
+                elif inst != 'halt':  # if is halt, C000, inst is already set
+                    code = ''.join(code[1:]) # skip first (instruction)
+                    self.memory[2*index] |= hex(code[0])
+                    self.memory[2*inde + 1] = hex(code[1:])
 
     def storeMemory(self, path):
         assert self.memory, "Memory is not loaded, call Simulator.loadMemory first!"
@@ -41,13 +97,6 @@ class Simulator:
             return ret
         return wrapper
 
-    @staticmethod
-    def __scale_up_to_exp(value, exp):
-        old_exp = (value & 0b1110000) >> 4
-        mantissa = value & 0b1111
-        mantissa >>= exp - old_exp
-        return (value & 1 << 7) | exp << 4 | mantissa
-
     @instruction(0xF00, 0xFF)
     # Extract 2nd bit, 3rd to 4th bit from max 0xFFFF int
     def laod_addr(self, reg, addr):
@@ -72,24 +121,7 @@ class Simulator:
 
     @instruction(0xF00, 0xF0, 0xF)
     def add_float(self, dest, a, b):
-        a, b = self.registers[a], self.registers[b]
-        sign_a, sign_b = (a & 1 << 7) >> 7, (b & 1 << 7) >> 7
-        exp_a, exp_b = (a & 0b1110000) >> 4, (b & 0b1110000) >> 4
-        man_a, man_b = a & 0b111, b & 0b111
-        max_exp = max(exp_a, exp_b)
-        if exp_a != max_exp:
-            a = self.__scale_up_to_exp(a, max_exp)
-        elif exp_b != max_exp:
-            b = self.__scale_up_to_exp(a, max_exp)
-        if sign_a ^ sign_b:  # Sign are different
-            # TODO do exp need to be changed?
-            # TODO if == 0, sign may became 1
-            self.registers[dest] = (sign_a if man_a > man_b else sign_b) << 7 | max_exp | (
-                sign_a - sign_b if man_a > man_b else sign_b - sign_a)
-        else:
-            # TODO do exp need to be changed?
-            self.registers[dest] = sign_a << 7 | max_exp | (
-                man_a + man_b) & 0b1111
+        self.registers[dest] = Float(a) + Float(b)
 
     @instruction(0xF00, 0xF0, 0xF)
     def binary_or(self, dest, a, b):
