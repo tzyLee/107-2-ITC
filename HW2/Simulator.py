@@ -62,14 +62,14 @@ class Simulator:
                 inst = self.asm[code[0]]
                 self.memory[2*index] = inst << 4
                 if inst == 'mv':
-                    self.memory[2*index + 1] = hex(''.join(code[1:]))
+                    self.memory[2*index + 1] = int(''.join(code[1:]), 16)
                 elif inst == 'srl':
-                    self.memory[2*index] |= hex(code[1])
-                    self.memory[2*index + 1] = hex(code[-1])
+                    self.memory[2*index] |= int(code[1], 16)
+                    self.memory[2*index + 1] = int(code[-1], 16)
                 elif inst != 'halt':  # if is halt, C000, inst is already set
-                    code = ''.join(code[1:]) # skip first (instruction)
-                    self.memory[2*index] |= hex(code[0])
-                    self.memory[2*inde + 1] = hex(code[1:])
+                    code = ''.join(code[1:])  # skip first (instruction)
+                    self.memory[2*index] |= int(code[0], 16)
+                    self.memory[2*inde + 1] = int(code[1:], 16)
 
     def storeMemory(self, path):
         assert self.memory, "Memory is not loaded, call Simulator.loadMemory first!"
