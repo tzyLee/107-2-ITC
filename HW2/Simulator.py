@@ -1,4 +1,3 @@
-from functools import wraps
 _instructions = []
 _asm_name = ['lw', 'lb', 'sw', 'mv', 'add', 'addf',
              'or', 'and', 'xor', 'srl', 'beq', 'halt']
@@ -27,21 +26,13 @@ class Float:
                 sum >>= 1 # truncate
                 exp += 1
             if sum > 0b1111:
-                sum >>= 1 # truncate, cannot be greater than 0b1111 + 0b1111 = 0b11110
+                sum >>= 1 # truncate, cannot be greater than 0b1111 + 0b1111 = 0b11110 (smaller exp cannot scale to bigger mantissa)
             return self.sign << 7 | exp << 4 | sum
         else:
             if self.man == b.man:
                 return self.exp << 4 # 0 with exponent
             else:
                 return (self.sign if self.man > b.man else b.sign) << 7 | self.exp << 4 | abs(self.man - b.man)
-    
-    def __float__(self):
-        exp = (1 << (self.exp - 4)) if self.exp >= 4 else (1 / (1 << (4 - self.exp)))
-        return  (1.0 - 2 * self.sign) * self.man / (1 << 4) * exp
-    
-    def __repr__(self):
-        return 'Float({:b}_{:b}_{:b})'.format(self.sign, self.exp, self.man)
-
 
 class Simulator:
     def __init__(self):
@@ -97,7 +88,6 @@ class Simulator:
         def wrapper(func):
             global _instructions
 
-            @wraps(func)
             def ret(self, operand):
                 return func(self, *((operand & mask) >> shift for mask, shift in masks))
             _instructions.append(ret)
@@ -156,61 +146,3 @@ class Simulator:
     @instruction()
     def halt(self):
         return True  # Other instructions returns None
-
-if __name__ == '__main__':
-    sim = Simulator()
-    sim.loadAssembly("input/bonus.txt")
-    sim.simulate()
-#     # Unit tests
-#     sim = Simulator()
-#     sim.memory = bytearray(256)
-#     # Test rotation
-#     # from collections import deque # Debug use
-#     # for num in range(0xFF):
-#     #     for shift in range(0xFF):
-#     #         q = deque('{:08b}'.format(num))
-#     #         q.rotate(shift)
-#     #         sim.load_const(0b0001_00000000 | num) # use register 1 to test rotation
-#     #         sim.rotate_r(0b0001_00000000 | shift)
-#     #         assert int(''.join(q), 2) == sim.registers[1]
-
-#     # Add float test: Same exponent, different sign
-#     # for exp in range(7): # same exp
-#     #     for man in range(0b10000):
-#     #         for man2 in range(0b10000):
-#     #             num = exp << 4 | man
-#     #             num2 = exp << 4 | man2
-#     #             a = Float(num)
-#     #             b = Float(0b1000_0000 | num2) # negative
-#     #             sum = a + b
-#     #             if float(Float(sum)) != float(a) + float(b):
-#     #                 print(a, '+', b, '=', Float(a+b), 'i.e. ', float(Float(sum)), ',', float(a), '+', float(b), '=', float(a)+float(b))
-
-#     # # Add float test: Without exception, same sign
-#     # for exp in range(7): # same exp
-#     #     for man in range(0b10000):
-#     #         for man2 in range(0b10000):
-#     #             num = exp << 4 | man
-#     #             num2 = exp << 4 | man2
-#     #             a = Float(num)
-#     #             b = Float(num2)
-#     #             try:
-#     #                 sum = a + b
-#     #                 if float(Float(sum)) != float(a) + float(b):
-#     #                     print(a, '+', b, '=', Float(a+b), 'i.e. ', float(Float(sum)), ',', float(a), '+', float(b), '=', float(a)+float(b))
-#     #             except Exception as e:
-#     #                 pass
-
-#     # count = 0
-#     # for num in range(0b100000000):
-#     #     for num2 in range(0b100000000):
-#     #         a = Float(num)
-#     #         b = Float(num2)
-#     #         try:
-#     #             sum = a + b
-#     #             if float(Float(sum)) != float(a) + float(b):
-#     #                 print(a, '+', b, '=', Float(a+b), 'i.e. ', float(Float(sum)), ',', float(a), '+', float(b), '=', float(a)+float(b))
-#     #         except Exception as e:
-#     #             count += 1
-#     #             pass
-#     # print('Number of exception raised:', count)
