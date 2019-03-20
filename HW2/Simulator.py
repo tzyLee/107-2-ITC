@@ -1,3 +1,4 @@
+from functools import wraps
 _instructions = []
 _asm_name = ['lw', 'lb', 'sw', 'mv', 'add', 'addf',
              'or', 'and', 'xor', 'srl', 'beq', 'halt']
@@ -92,10 +93,10 @@ class Simulator:
     # Helper functions
     def instruction(*masks):  # Concatenate 2 bytes, use argument as mask
         masks = [(mask, 4*'{:x}'.format(mask).count('0')) for mask in masks]
-
         def wrapper(func):
             global _instructions
 
+            @wraps(func)
             def ret(self, operand):
                 return func(self, *((operand & mask) >> shift for mask, shift in masks))
             _instructions.append(ret)
@@ -117,7 +118,7 @@ class Simulator:
 
     @instruction(0xF0, 0xF)
     def move(self, src, dest):
-        self.memory[dest] = self.memory[src]
+        self.registers[dest] = self.registers[src]
 
     @instruction(0xF00, 0xF0, 0xF)
     # Extract 2nd bit, 3rd and 4th bit from max 0xFFFF int
@@ -148,14 +149,17 @@ class Simulator:
 
     @instruction(0xF00, 0xFF)
     def jeq(self, reg, value):
-        if self.registers[reg] == value:
-            self.pc = value
+        if self.registers[reg] == self.registers[0]:
+            self.pc = value - 2 # pc += 2 when instruction is executed
 
     @instruction()
     def halt(self):
         return True  # Other instructions returns None
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    sim = Simulator()
+    sim.loadMemory("input/input3")
+    sim.simulate()
 #     # Unit tests
 #     sim = Simulator()
 #     sim.memory = bytearray(256)
