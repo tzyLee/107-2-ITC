@@ -6,6 +6,9 @@ def main():
         sim.loadMemory("input/input{}".format(i))
         sim.simulate()
         sim.storeMemory("output/output{}".format(i))
+    sim.loadAssembly("input/bonus.txt")
+    sim.simulate()
+    sim.storeMemory("output/bonus")
 
 
 if __name__ == '__main__':
