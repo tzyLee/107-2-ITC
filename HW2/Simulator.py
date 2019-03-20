@@ -15,7 +15,7 @@ class Float:
             b.exp = self.exp
         else:
             self.man >>= b.exp - self.exp
-            self.exp = self.exp
+            self.exp = b.exp
 
     def __add__(self, b):
         self.__scale_up_exp(b)
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     #             if float(Float(sum)) != float(a) + float(b):
     #                 print(a, '+', b, '=', Float(a+b), 'i.e. ', float(Float(sum)), ',', float(a), '+', float(b), '=', float(a)+float(b))
 
-    # # Add float test: Without exception
+    # # Add float test: Without exception, same sign
     # for exp in range(7): # same exp
     #     for man in range(0b10000):
     #         for man2 in range(0b10000):
@@ -201,3 +201,17 @@ if __name__ == '__main__':
     #                     print(a, '+', b, '=', Float(a+b), 'i.e. ', float(Float(sum)), ',', float(a), '+', float(b), '=', float(a)+float(b))
     #             except Exception as e:
     #                 pass
+
+    count = 0
+    for num in range(0b100000000):
+        for num2 in range(0b100000000):
+            a = Float(num)
+            b = Float(num2)
+            try:
+                sum = a + b
+                if float(Float(sum)) != float(a) + float(b):
+                    print(a, '+', b, '=', Float(a+b), 'i.e. ', float(Float(sum)), ',', float(a), '+', float(b), '=', float(a)+float(b))
+            except Exception as e:
+                count += 1
+                pass
+    print('Number of exception raised:', count)
