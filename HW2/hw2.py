@@ -2,7 +2,7 @@ import Simulator
 
 def main():
     sim = Simulator.Simulator()
-    for i in range(1,6):
+    for i in range(1,7):
         sim.loadMemory("input/input{}".format(i))
         sim.simulate()
         sim.storeMemory("output/output{}".format(i))

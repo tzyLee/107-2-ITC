@@ -85,6 +85,7 @@ class Simulator:
 
     def simulate(self):
         assert self.memory, "Memory is not loaded, call Simulator.loadMemory first!"
+        self.registers = [0 for i in range(16)]
         print("simulate")
         self.pc = 0
         while not self.instructions[((self.memory[self.pc] & 0xF0) >> 4) - 1](self, (self.memory[self.pc] & 0xF) << 8 | self.memory[self.pc+1]):
@@ -158,7 +159,7 @@ class Simulator:
 
 if __name__ == '__main__':
     sim = Simulator()
-    sim.loadMemory("input/input3")
+    sim.loadAssembly("input/bonus.txt")
     sim.simulate()
 #     # Unit tests
 #     sim = Simulator()
