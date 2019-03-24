@@ -5,7 +5,7 @@
 int main() {
     Simulator sim;
     for(int i = 1 ; i < 7 ; i++){
-	string index;
+	std::string index;
 	std::stringstream ss;
 	ss << i;
 	index = ss.str();
