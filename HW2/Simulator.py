@@ -1,5 +1,5 @@
 _instructions = []
-_asm_name = ['lw', 'lb', 'sw', 'mv', 'add', 'addf',
+_asm_name = ['noop', 'lw', 'lb', 'sw', 'mv', 'add', 'addf',
              'or', 'and', 'xor', 'srl', 'beq', 'halt']
 
 
@@ -25,9 +25,7 @@ class Float:
             if sum > 0b1111 and exp < 0b111:
                 sum >>= 1 # truncate
                 exp += 1
-            if sum > 0b1111:
-                sum >>= 1 # truncate, cannot be greater than 0b1111 + 0b1111 = 0b11110 (smaller exp cannot scale to bigger mantissa)
-            return self.sign << 7 | exp << 4 | sum
+            return self.sign << 7 | exp << 4 | sum & 0b1111 # exp == 0b111, make it overflow (normalized)
         else:
             if self.man == b.man:
                 return self.exp << 4 # 0 with exponent
@@ -51,7 +49,7 @@ class Simulator:
     def loadAssembly(self, path):
         print("loadAssembly")
         if not getattr(self, 'asm', None):
-            self.asm = {name: index for index, name in enumerate(_asm_name, 1)}
+            self.asm = {name: index for index, name in enumerate(_asm_name)}
         self.memory = bytearray(256)
         with open(path, 'r') as file:
             for index, line in enumerate(file):
@@ -79,7 +77,7 @@ class Simulator:
         self.registers = [0 for i in range(16)]
         print("simulate")
         self.pc = 0
-        while not self.instructions[((self.memory[self.pc] & 0xF0) >> 4) - 1](self, (self.memory[self.pc] & 0xF) << 8 | self.memory[self.pc+1]):
+        while not self.instructions[((self.memory[self.pc] & 0xF0) >> 4)](self, (self.memory[self.pc] & 0xF) << 8 | self.memory[self.pc+1]):
             self.pc += 2
 
     # Helper functions
@@ -94,6 +92,10 @@ class Simulator:
             return ret
         return wrapper
 
+    @instruction()
+    def noop(self):
+        return False
+    
     @instruction(0xF00, 0xFF)
     # Extract 2nd bit, 3rd to 4th bit from max 0xFFFF int
     def laod_addr(self, reg, addr):
