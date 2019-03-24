@@ -61,10 +61,15 @@ class Simulator:
                 elif inst == 'srl':
                     self.memory[2*index] |= int(code[1], 16)
                     self.memory[2*index + 1] = int(code[-1], 16)
+                elif inst == 'beq':
+                    self.memory[2*index] |= int(code[2], 16)
+                    self.memory[2*index + 1] = int(code[3], 16)
                 elif inst != 'halt':  # if is halt, C000, inst is already set
                     code = ''.join(code[1:])  # skip first (instruction)
                     self.memory[2*index] |= int(code[0], 16)
                     self.memory[2*index + 1] = int(code[1:], 16)
+                else:
+                    break # reach the end of program
 
     def storeMemory(self, path):
         assert self.memory, "Memory is not loaded, call Simulator.loadMemory first!"

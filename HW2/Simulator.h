@@ -12,6 +12,7 @@ public:
 
     Simulator() : _pc(0), _registers{0}, _memory{0} {}
     bool loadMemory(const std::string&);
+    bool loadAssembly(const std::string&);
     bool storeMemory(const std::string&);
     bool simulate();
 private:
@@ -19,6 +20,7 @@ private:
     unsigned char _registers[16];
     unsigned char _memory[256];
     static Instruction _instructions[13];
+    static char _instructionLiteral[13][5];
 
     bool _noop(uint16_t);
     bool _lw(uint16_t);
