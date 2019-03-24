@@ -18,19 +18,19 @@ class Float:
             self.exp = b.exp
 
     def __add__(self, b):
-        self.__scale_up_exp(b)
-        if self.sign == b.sign:
+        self.__scale_up_exp(b) # Make exp of self and exp of b the same (use the bigger one)
+        if self.sign == b.sign: # Signs are the same, addition
             sum = self.man + b.man
             exp = self.exp
-            if sum > 0b1111 and exp < 0b111:
+            if sum > 0b1111 and exp < 0b111: # If exp can be increase to hold the number
                 sum >>= 1 # truncate
                 exp += 1
             return self.sign << 7 | exp << 4 | sum & 0b1111 # exp == 0b111, make it overflow (normalized)
-        else:
+        else: # Signs are different, subtraction
             if self.man == b.man:
                 return self.exp << 4 # 0 with exponent
             else:
-                return (self.sign if self.man > b.man else b.sign) << 7 | self.exp << 4 | abs(self.man - b.man)
+                return (self.sign if self.man > b.man else b.sign) << 7 | self.exp << 4 | abs(self.man - b.man) # Use the bigger exponent, so subtraction won't yield a result bigger than 0b1111
 
 class Simulator:
     def __init__(self):
@@ -39,7 +39,7 @@ class Simulator:
             self.instructions = _instructions
         self.memory = None
         self.registers = [0 for i in range(16)]
-        self.pc = 0
+        self.pc = 0 # program counter
 
     def loadMemory(self, path):
         print("loadMemory")
@@ -55,7 +55,7 @@ class Simulator:
             for index, line in enumerate(file):
                 code = line.strip().lower().split(' ')
                 inst = code[0]
-                self.memory[2*index] = self.asm[inst] << 4
+                self.memory[2*index] = self.asm[inst] << 4 # save opcode to memory
                 if inst == 'mv':
                     self.memory[2*index + 1] = int(''.join(code[1:]), 16)
                 elif inst == 'srl':
@@ -77,7 +77,7 @@ class Simulator:
         self.registers = [0 for i in range(16)]
         print("simulate")
         self.pc = 0
-        while not self.instructions[((self.memory[self.pc] & 0xF0) >> 4)](self, (self.memory[self.pc] & 0xF) << 8 | self.memory[self.pc+1]):
+        while not self.instructions[((self.memory[self.pc] & 0xF0) >> 4)](self, (self.memory[self.pc] & 0xF) << 8 | self.memory[self.pc+1]): # extract opcode to find member function, pass in 8-bit number as operand
             self.pc += 2
 
     # Helper functions
