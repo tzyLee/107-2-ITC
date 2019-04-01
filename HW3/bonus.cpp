@@ -20,11 +20,21 @@ void arr_cpy(unsigned dim, double* src, double* dest) {
 }
 
 inline void arr_diff(unsigned dim, double* a, double* b, double* out) {
-    std::transform(a, a+dim*dim, b, out, [](double a, double b){ return a+b; });
+    std::transform(a, a+dim*dim, b, out, [](double a, double b){ return a-b; });
 }
 
 inline void arr_add(unsigned dim, double* a, double* b, double* out) {
-    std::transform(a, a+dim*dim, b, out, [](double a, double b){ return a-b; });
+    std::transform(a, a+dim*dim, b, out, [](double a, double b){ return a+b; });
+}
+
+void print_arr(unsigned dim, double* arr) {
+    std::cerr.put('\n');
+    for(int i=0; i<dim; ++i) {
+        for(int j=0; j<dim; ++j) {
+            std::cerr << arr[i*dim + j] << ' ';
+        }
+        std::cerr.put('\n');
+    }
 }
 
 void strassen(unsigned dim, double* a, double* b, double* out)
@@ -60,7 +70,7 @@ void strassen(unsigned dim, double* a, double* b, double* out)
         arr_add(half, B[0], B[3], second); // second = B11 + B22
         strassen(half, first, second, M[0]); // M[0] = first * second
 
-        arr_diff(half, A[2], A[3], first); // first = A21 + A22
+        arr_add(half, A[2], A[3], first); // first = A21 + A22
         strassen(half, first, B[0], M[1]); // M[1] = first * B11
 
         arr_diff(half, B[1], B[3], second); // second = B12 - B22
@@ -69,7 +79,7 @@ void strassen(unsigned dim, double* a, double* b, double* out)
         arr_diff(half, B[2], B[0], second); // second = B21 - B11
         strassen(half, A[3], second, M[3]); // M[3] = A22 * second
 
-        arr_add(half, A[0], A[2], first); // first = A11 + A12
+        arr_add(half, A[0], A[1], first); // first = A11 + A12
         strassen(half, first, B[3], M[4]); // M[4] = first * B22
 
         arr_diff(half, A[2], A[0], first); // first = A21 - A11
