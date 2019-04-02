@@ -37,7 +37,8 @@ void strassen(unsigned dim, double* a, double* b, double* out)
                 out[i * dim + j] = a[i * dim] * b[j] + a[i * dim + 1] * b[dim + j];
     }
     else {
-        unsigned half = (dim + 1) / 2;
+        const unsigned half = (dim + 1) / 2;
+        const unsigned len = dim%2 ? half-1 : half;
         double *A[4] = {nullptr}; // A == [A0 A1; A2 A3]
         double *B[4] = {nullptr}; // B == [B0 B1; B2 B3]
         double *M[7] = {nullptr};
@@ -50,13 +51,13 @@ void strassen(unsigned dim, double* a, double* b, double* out)
         for (int i = 4; i < 7; ++i)
             M[i] = new double[half * half];
         arr_cpy(dim, a, A[0]);
-        arr_cpy(dim, half - 1, half, a + half, A[1]);
-        arr_cpy(dim, half, half - 1, a + half*dim, A[2]);
-        arr_cpy(dim, half - 1, half - 1, a + half*dim + half, A[3]);
+        arr_cpy(dim, len, half, a + half, A[1]);
+        arr_cpy(dim, half, len, a + half*dim, A[2]);
+        arr_cpy(dim, len, len, a + half*dim + half, A[3]);
         arr_cpy(dim, b, B[0]);
-        arr_cpy(dim, half - 1, half, b + half, B[1]);
-        arr_cpy(dim, half, half - 1, b + half*dim, B[2]);
-        arr_cpy(dim, half - 1, half - 1, b + half*dim + half, B[3]);
+        arr_cpy(dim, len, half, b + half, B[1]);
+        arr_cpy(dim, half, len, b + half*dim, B[2]);
+        arr_cpy(dim, len, len, b + half*dim + half, B[3]);
 
         arr_add(half, A[0], A[3], first); // first = A11 + A22
         arr_add(half, B[0], B[3], second); // second = B11 + B22
@@ -88,7 +89,6 @@ void strassen(unsigned dim, double* a, double* b, double* out)
         for(unsigned i=0; i<half; ++i) // Copy C11 to out
             std::copy(first + i*half, first + i*half + half, out + i*dim);
 
-        unsigned len = half%2 ? half-1 : half;
         arr_add(half, M[2], M[4], first); // first = P3 + P5
         for(unsigned i=0; i<half; ++i) // Copy C12 to out
             std::copy(first + i*half, first + i*half + len, out + i*dim + half);
@@ -117,7 +117,6 @@ void strassen(unsigned dim, double* a, double* b, double* out)
 
 int main() {
     std::ifstream ifs("matrix_in.txt");
-    // std::ifstream ifs("matrix_in.txt");
     unsigned dim = 0;
     ifs >> dim;
     std::size_t size = dim*dim;
