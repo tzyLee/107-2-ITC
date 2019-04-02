@@ -1,22 +1,24 @@
 #include <algorithm>
 #include <cstring>
+#include <cassert>
 #include <fstream>
-#include <iostream>
 #include <memory>
 
 void arr_cpy(unsigned dim, double* src, double* dest) {
+    // Copy dim*dim from src to dest
     unsigned half = (dim + 1) / 2;
-    if (dim % 2 == 0) {
-        for (unsigned i = 0; i < half; ++i)
-            std::copy(src + i * dim, src + i * dim + half, dest + i * half); // copy rows from src to dest
+    for (unsigned i = 0; i < half; ++i)
+        std::copy(src + i * dim, src + i * dim + half, dest + i * half); // copy rows from src to dest
+}
+
+void arr_cpy(unsigned dim, unsigned w, unsigned h, double* src, double* dest) {
+    // Copy rectangular area w*h from src[half*half] to dest[dim*dim]
+    unsigned half = (dim + 1) / 2;
+    for(unsigned i=0; i<h; ++i) {
+        std::copy(src + i * dim, src + i * dim + w, dest + i * half);
+        std::fill(dest + i * half + w, dest + (i+1) * half, 0); // set values after w-th to zero
     }
-    else {
-        for (unsigned i = 0; i < half - 1; ++i) // copy except last row (i < half - 1)
-            std::copy(dest + i * half, dest + i * half + half - 1, src + i * dim); // copy except last column (half - 1)
-        std::fill(dest + (half - 1) * half, dest + half * half, 0); // set last row to 0
-        for (unsigned i = 0; i < half - 1; ++i)
-            dest[i * half + half - 1] = 0; // pad last column with 0
-    }
+    std::fill(dest + h * half, dest + half * half, 0); // set row after h-th to zero
 }
 
 inline void arr_diff(unsigned dim, double* a, double* b, double* out) {
@@ -25,16 +27,6 @@ inline void arr_diff(unsigned dim, double* a, double* b, double* out) {
 
 inline void arr_add(unsigned dim, double* a, double* b, double* out) {
     std::transform(a, a+dim*dim, b, out, [](double a, double b){ return a+b; });
-}
-
-void print_arr(unsigned dim, double* arr) {
-    std::cerr.put('\n');
-    for(int i=0; i<dim; ++i) {
-        for(int j=0; j<dim; ++j) {
-            std::cerr << arr[i*dim + j] << ' ';
-        }
-        std::cerr.put('\n');
-    }
 }
 
 void strassen(unsigned dim, double* a, double* b, double* out)
@@ -58,13 +50,13 @@ void strassen(unsigned dim, double* a, double* b, double* out)
         for (int i = 4; i < 7; ++i)
             M[i] = new double[half * half];
         arr_cpy(dim, a, A[0]);
-        arr_cpy(dim, a + half, A[1]);
-        arr_cpy(dim, a + half*dim, A[2]);
-        arr_cpy(dim, a + half*dim + half, A[3]);
+        arr_cpy(dim, half - 1, half, a + half, A[1]);
+        arr_cpy(dim, half, half - 1, a + half*dim, A[2]);
+        arr_cpy(dim, half - 1, half - 1, a + half*dim + half, A[3]);
         arr_cpy(dim, b, B[0]);
-        arr_cpy(dim, b + half, B[1]);
-        arr_cpy(dim, b + half*dim, B[2]);
-        arr_cpy(dim, b + half*dim + half, B[3]);
+        arr_cpy(dim, half - 1, half, b + half, B[1]);
+        arr_cpy(dim, half, half - 1, b + half*dim, B[2]);
+        arr_cpy(dim, half - 1, half - 1, b + half*dim + half, B[3]);
 
         arr_add(half, A[0], A[3], first); // first = A11 + A22
         arr_add(half, B[0], B[3], second); // second = B11 + B22
@@ -93,22 +85,22 @@ void strassen(unsigned dim, double* a, double* b, double* out)
         arr_add(half, M[0], M[3], first); // first = P1 + P4
         arr_diff(half, first, M[4], first); // first -= P5
         arr_add(half, first, M[6], first); // first += P7
-        for(unsigned i=0; i<half; ++i)
+        for(unsigned i=0; i<half; ++i) // Copy C11 to out
             std::copy(first + i*half, first + i*half + half, out + i*dim);
 
         unsigned len = half%2 ? half-1 : half;
         arr_add(half, M[2], M[4], first); // first = P3 + P5
-        for(unsigned i=0; i<half; ++i)
+        for(unsigned i=0; i<half; ++i) // Copy C12 to out
             std::copy(first + i*half, first + i*half + len, out + i*dim + half);
 
         arr_add(half, M[1], M[3], first); // first = P2 + P4
-        for(unsigned i=0; i<len; ++i)
+        for(unsigned i=0; i<len; ++i) // Copy C21 to out
             std::copy(first + i*half, first + i*half + half, out + (i + half)*dim);
 
         arr_add(half, M[0], M[2], first); // first = P1 + P3
         arr_diff(half, first, M[1], first); // first -= P2
         arr_add(half, first, M[5], first); // first += P6
-        for(unsigned i=0; i<len; ++i)
+        for(unsigned i=0; i<len; ++i) // Copy C22 to out
             std::copy(first + i*half, first + i*half + len, out + (i+half)*dim + half);
 
         for (int i = 0; i < 4; ++i) {
@@ -124,7 +116,7 @@ void strassen(unsigned dim, double* a, double* b, double* out)
 }
 
 int main() {
-    std::ifstream ifs("matrix_test.txt");
+    std::ifstream ifs("matrix_in.txt");
     // std::ifstream ifs("matrix_in.txt");
     unsigned dim = 0;
     ifs >> dim;
