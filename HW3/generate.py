@@ -1,6 +1,6 @@
 import numpy as np
 
-size = 4
+size = 3
 a = np.random.randn(size, size)
 b = np.random.randn(size, size)
 fmt = '%.6f'
