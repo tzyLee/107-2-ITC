@@ -6,9 +6,13 @@
 template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
 void decrypt(std::ofstream& ofs, std::ifstream& ifs, T N, T d) {
     T chunk = 0;
+    char temp = 0;
     while(ifs >> chunk) {
         chunk = pow(chunk, d, N);
-        ofs << static_cast<char>(chunk >> 8) << static_cast<char>(chunk & 0xFF);
+        ofs << static_cast<char>(chunk >> 8);
+        temp = static_cast<char>(chunk & 0xFF);
+        if(temp)
+            ofs << temp;
     }
     ofs.flush();
 }
