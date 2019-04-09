@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <fstream>
-#include <string>
 #include <type_traits>
 
 template<class T, class U, class = typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value>::type>

@@ -1,5 +1,5 @@
 CXXFLAGS = -std=c++11 -O3
-#CXXFLAGS = -std=c++11 -g -Wall
+# CXXFLAGS = -std=c++11 -g -Wall
 
 all: cipher decipher find bonus
 

@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <fstream>
-#include <string>
 #include "pow.h"
 
 template<class T, class = typename std::enable_if<std::is_integral<T>::value>::type>
