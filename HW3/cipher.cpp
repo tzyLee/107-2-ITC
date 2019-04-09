@@ -9,11 +9,11 @@ void encrypt(std::ofstream& ofs, std::string& message, T N, T e) {
     T temp = 0;
     for(unsigned i=0; i<end; i+=2) {
         temp = (message[i] << 8) | message[i+1];
-        ofs << pow(temp, e, N) << '\n';
+        ofs << '\n' << pow(temp, e, N);
     }
     if (end%2 == 0) { // end+1 is odd => end is even
         temp = message[end] << 8;
-        ofs << pow(temp, e, N) << '\n';
+        ofs << '\n' << pow(temp, e, N);
     }
     ofs.flush();
 }

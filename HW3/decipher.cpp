@@ -10,8 +10,8 @@ void decrypt(std::ofstream& ofs, std::ifstream& ifs, T N, T d) {
     while(ifs >> chunk) {
         chunk = pow(chunk, d, N);
         ofs << static_cast<char>(chunk >> 8);
-        temp = static_cast<char>(chunk & 0xFF);
-        if(temp)
+        temp = chunk & 0xFF;
+        if(ifs.peek() != EOF || temp) // is not last or (is last chunk and temp is not 0)
             ofs << temp;
     }
     ofs.flush();
