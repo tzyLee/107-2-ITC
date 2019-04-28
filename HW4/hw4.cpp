@@ -4,7 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <iterator>
+#include <queue>
 #include <type_traits>
 #include <vector>
 using namespace std;
@@ -58,51 +58,30 @@ void release()
     delete[] real_h;
 }
 
-template <class Member, class = typename std::enable_if<std::is_pointer<Member>::value>::type>
-struct MinHeap
+template <class T, class = typename std::enable_if<std::is_pointer<T>::value>::type>
+struct greater_ptr
 {
-    using Base = typename std::remove_const<typename std::remove_pointer<Member>::type>::type;
-    MinHeap(std::vector<Base> &source) : container()
-    {
-        container.reserve(source.size());
-        // for (const Base &node : source)
-        //     container.push_back(&node);
-        // std::make_heap(container.begin(), container.end(), MinHeap::comp);
-    }
-    void pop_top(int &i, int &j)
-    {
-        std::pop_heap(container.begin(), container.end(), MinHeap::comp);
-        const Base &smallest = *container.back();
-        i = smallest._i;
-        j = smallest._j;
-        container.pop_back();
-    }
-    void push(const Member &newNode)
-    {
-        container.push_back(newNode);
-        std::push_heap(container.begin(), container.end(), MinHeap::comp);
-    }
-    void update(const Member &target, double newKey)
-    {
-        assert(target->minDistance >= newKey); // Always update to a smaller key
-        auto res = std::find(container.cbegin(), container.cend(), target);
-        assert(res != container.cend());
-        assert(*res == target);
-        auto index = std::distance(container.cbegin(), res);
-        assert(container[index] == target);
-        for (; index && *container[index / 2] > newKey; index /= 2) // If parent is bigger than current
-            container[index] = container[index / 2];
-        container[index] = target;
-    }
-    static bool comp(Member &a, Member &b)
+    bool operator()(T &a, T &b) const
     {
         return *a > *b;
     }
-    bool empty() const
+};
+
+template <class Member, class = typename std::enable_if<std::is_pointer<Member>::value>::type>
+struct MinHeap : public std::priority_queue<Member, std::vector<Member>, greater_ptr<Member>>
+{
+    using Super = std::priority_queue<Member, std::vector<Member>, greater_ptr<Member>>;
+    MinHeap(std::size_t size) : Super()
     {
-        return container.empty();
+        Super::c.reserve(size);
     }
-    std::vector<Member> container;
+    void update(const Member &target) // key of target should be updated
+    {
+        auto res = std::find(Super::c.cbegin(), Super::c.cend(), target); // remove and push
+        assert(res != Super::c.cend());
+        Super::c.erase(res);
+        this->push(target);
+    }
 };
 
 enum class Direction : char
@@ -116,17 +95,17 @@ enum class Direction : char
 
 struct Node
 {
-    Node(int i, int j) : lastNode(Direction::Unset), minDistance(INFINITY), _i(i), _j(j), traversed(false) {}
+    Node(int i, int j) : minDistance(INFINITY), _i(i), _j(j), lastNode(Direction::Unset), removed(false) {}
     Node() : Node(-1, -1) {}
     void update(MinHeap<const Node *> &pq, double distance, Direction direction)
     {
-        if (!traversed && minDistance > distance)
+        if (!removed && minDistance > distance)
         {
             minDistance = distance;
             if (lastNode == Direction::Unset) // this node had not been traversed before
                 pq.push(this);
             else
-                pq.update(this, minDistance);
+                pq.update(this);
             lastNode = direction;
         }
     }
@@ -134,18 +113,10 @@ struct Node
     {
         return minDistance > other.minDistance;
     }
-    bool operator>(double dist) const
-    {
-        return minDistance > dist;
-    }
-    bool operator=(const Node &other) const
-    {
-        return this == &other;
-    }
     double minDistance;
     int _i, _j;
-    Direction lastNode;
-    bool traversed;
+    Direction lastNode; // How lastNode get to this
+    bool removed;
 };
 
 int main()
@@ -162,25 +133,26 @@ int main()
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < m; ++j)
             nodes.emplace_back(i, j);
+    MinHeap<const Node *> pq(nodes.size());
+    // Dijkstra's algorithm
     nodes[_ind(0, 0)].minDistance = 0;
-    MinHeap<const Node *> pq(nodes);
-    Node *current = &nodes[_ind(0, 0)], *source = current;
+    int i = 0, j = 0;
     do
     {
-        int i = current->_i, j = current->_j;
-        current->traversed = true;
+        double distance = nodes[_ind(i, j)].minDistance;
         if (i > 1)
-            nodes[_ind(i - 1, j)].update(pq, current->minDistance + v[i - 1][j], Direction::Down);
+            nodes[_ind(i - 1, j)].update(pq, distance + v[i - 1][j], Direction::Up);
         if (i < n)
-            nodes[_ind(i + 1, j)].update(pq, current->minDistance + v[i][j], Direction::Up);
+            nodes[_ind(i + 1, j)].update(pq, distance + v[i][j], Direction::Down);
         if (j > 1)
-            nodes[_ind(i, j - 1)].update(pq, current->minDistance + h[i][j - 1], Direction::Right);
+            nodes[_ind(i, j - 1)].update(pq, distance + h[i][j - 1], Direction::Left);
         if (j < m)
-            nodes[_ind(i, j + 1)].update(pq, current->minDistance + h[i][j], Direction::Left);
-        pq.pop_top(i, j);
-        assert(i >= 0 && i < n && j >= 0 && j < m);
-        current = &nodes[_ind(i, j)];
-    } while (!pq.empty());
+            nodes[_ind(i, j + 1)].update(pq, distance + h[i][j], Direction::Right);
+        const Node *temp = pq.top();
+        nodes[_ind(i, j)].removed = true;                 // mark current node as visited
+        i = temp->_i, j = temp->_j;                       // get next node index
+        pq.pop();                                         // remove current node
+    } while (!pq.empty() && !(i == n - 1 && j == m - 1)); // while not reach destination or have node left to check
     // Backtrace
     std::vector<char> route;
     route.reserve(m + n);                                            // minimum nodes to travel                                            // destination
@@ -188,19 +160,20 @@ int main()
     Direction temp = Direction::Unset;
     for (int i = n - 1, j = m - 1; i != 0 || j != 0;)
     {
+        assert(nodes[_ind(i, j)].removed);
         switch (temp = nodes[_ind(i, j)].lastNode)
         {
-        case Direction::Up:
-            --i;
-            break;
-        case Direction::Down:
+        case Direction::Up: // goes down to get to lastNode
             ++i;
             break;
+        case Direction::Down:
+            --i;
+            break;
         case Direction::Left:
-            --j;
+            ++j;
             break;
         case Direction::Right:
-            ++j;
+            --j;
             break;
         default:
             assert(temp != Direction::Unset);
