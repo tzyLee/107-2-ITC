@@ -1,12 +1,8 @@
 
-#include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <iterator>
 #include <queue>
-#include <type_traits>
 #include <vector>
 using namespace std;
 
@@ -59,51 +55,20 @@ void release()
     delete[] real_h;
 }
 
-template <class T, class = typename std::enable_if<std::is_pointer<T>::value>::type>
-struct greater_ptr
-{
-    bool operator()(T &a, T &b) const
-    {
-        return *a > *b;
-    }
-};
-
-template <class Member, class = typename std::enable_if<std::is_pointer<Member>::value>::type>
-struct MinHeap : public std::priority_queue<Member, std::vector<Member>, greater_ptr<Member>>
-{
-    using Super = std::priority_queue<Member, std::vector<Member>, greater_ptr<Member>>;
-    MinHeap(std::size_t size) : Super()
-    {
-        Super::c.reserve(size);
-    }
-    void update(const Member &target) // key of target should be updated
-    {
-        auto res = std::find(Super::c.cbegin(), Super::c.cend(), target);
-        assert(res != Super::c.cend());
-        for (auto index = std::distance(Super::c.cbegin(), res); index; index /= 2) // Bubble up
-            Super::c[index] = Super::c[index / 2];
-        this->pop(); // Remove top
-        this->push(target);
-    }
-};
-
 struct Node
 {
     Node(int i, int j) : minDistance(INFINITY), _i(i), _j(j), lastNode('\0') {}
     Node() = delete;
-    void update(MinHeap<const Node *> &pq, double distance, char direction)
+    void update(std::priority_queue<Node> &pq, double distance, char direction)
     {
         if (!removed() && minDistance > distance)
         {
             minDistance = distance;
-            if (lastNode == '\0') // this node had not been traversed before
-                pq.push(this);
-            else
-                pq.update(this);
             lastNode = direction;
+            pq.push(*this);
         }
     }
-    bool operator>(const Node &other) const
+    bool operator<(const Node &other) const // Used by std::priority_queue<>, std::less<>
     {
         return minDistance > other.minDistance;
     }
@@ -121,7 +86,9 @@ struct Node
     }
     double minDistance;
     int _i, _j;
-    char lastNode; // How lastNode get to this
+
+  private:
+    char lastNode; // How lastNode get to this, first bit is used to store `removed` infomation
 };
 
 int main()
@@ -140,12 +107,14 @@ int main()
     for (int i = 0; i < HEIGHT; ++i)
         for (int j = 0; j < WIDTH; ++j)
             nodes.emplace_back(i, j);
-    MinHeap<const Node *> pq(nodes.size());
+    std::priority_queue<Node> pq;
     // Dijkstra's algorithm
     nodes[_ind(0, 0)].minDistance = 0;
     int i = 0, j = 0;
     do
     {
+        while (!pq.empty() && pq.top().removed())
+            pq.pop();
         nodes[_ind(i, j)].setRemoved(); // mark current node as visited
         double distance = nodes[_ind(i, j)].minDistance;
         if (i > 0)
@@ -156,7 +125,7 @@ int main()
             nodes[_ind(i, j - 1)].update(pq, distance + h[i][j - 1], 'l');
         if (j < m)
             nodes[_ind(i, j + 1)].update(pq, distance + h[i][j], 'r');
-        i = pq.top()->_i, j = pq.top()->_j;       // get next node index
+        i = pq.top()._i, j = pq.top()._j;         // get next node index
         pq.pop();                                 // remove current node
     } while (!pq.empty() && !(i == n && j == m)); // while not reach destination or have node left to check
     // Backtrace
