@@ -87,25 +87,16 @@ struct MinHeap : public std::priority_queue<Member, std::vector<Member>, greater
     }
 };
 
-enum Direction : char
-{
-    Unset = '\0',
-    Up = 'u',
-    Down = 'd',
-    Left = 'l',
-    Right = 'r'
-};
-
 struct Node
 {
-    Node(int i, int j) : minDistance(INFINITY), _i(i), _j(j), lastNode(Direction::Unset), removed(false) {}
+    Node(int i, int j) : minDistance(INFINITY), _i(i), _j(j), lastNode('\0') {}
     Node() = delete;
-    void update(MinHeap<const Node *> &pq, double distance, Direction direction)
+    void update(MinHeap<const Node *> &pq, double distance, char direction)
     {
-        if (!removed && minDistance > distance)
+        if (!removed() && minDistance > distance)
         {
             minDistance = distance;
-            if (lastNode == Direction::Unset) // this node had not been traversed before
+            if (lastNode == '\0') // this node had not been traversed before
                 pq.push(this);
             else
                 pq.update(this);
@@ -116,10 +107,21 @@ struct Node
     {
         return minDistance > other.minDistance;
     }
+    void setRemoved()
+    {
+        lastNode |= 1 << 7;
+    }
+    bool removed() const
+    {
+        return lastNode & (1 << 7);
+    }
+    char getParent() const
+    {
+        return lastNode & 0x7F;
+    }
     double minDistance;
     int _i, _j;
-    Direction lastNode; // How lastNode get to this
-    bool removed;       // TODO use Direction sign bit as bool
+    char lastNode; // How lastNode get to this
 };
 
 int main()
@@ -144,45 +146,44 @@ int main()
     int i = 0, j = 0;
     do
     {
-        nodes[_ind(i, j)].removed = true; // mark current node as visited
+        nodes[_ind(i, j)].setRemoved(); // mark current node as visited
         double distance = nodes[_ind(i, j)].minDistance;
-        if (i > 1)
-            nodes[_ind(i - 1, j)].update(pq, distance + v[i - 1][j], Direction::Up);
+        if (i > 0)
+            nodes[_ind(i - 1, j)].update(pq, distance + v[i - 1][j], 'u');
         if (i < n)
-            nodes[_ind(i + 1, j)].update(pq, distance + v[i][j], Direction::Down);
-        if (j > 1)
-            nodes[_ind(i, j - 1)].update(pq, distance + h[i][j - 1], Direction::Left);
+            nodes[_ind(i + 1, j)].update(pq, distance + v[i][j], 'd');
+        if (j > 0)
+            nodes[_ind(i, j - 1)].update(pq, distance + h[i][j - 1], 'l');
         if (j < m)
-            nodes[_ind(i, j + 1)].update(pq, distance + h[i][j], Direction::Right);
-        i = pq.top()->_i, j = pq.top()->_j; // get next node index
-        pq.pop();                           // remove current node
-        // } while (!pq.empty() && !(i == n && j == m)); // while not reach destination or have node left to check
-    } while (!pq.empty()); // while not reach destination or have node left to check
+            nodes[_ind(i, j + 1)].update(pq, distance + h[i][j], 'r');
+        i = pq.top()->_i, j = pq.top()->_j;       // get next node index
+        pq.pop();                                 // remove current node
+    } while (!pq.empty() && !(i == n && j == m)); // while not reach destination or have node left to check
     // Backtrace
     std::vector<char> route;
-    route.reserve(m + n);                                    // minimum nodes to travel                                            // destination
+    route.reserve(m + n);                                    // minimum nodes to travel
     std::cout << nodes[_ind(n, m)].minDistance << std::endl; // total distance = min distance from source to destination
-    Direction temp = Direction::Unset;
+    char temp = '\0';
     for (int i = n, j = m; i != 0 || j != 0;)
     {
-        switch (temp = nodes[_ind(i, j)].lastNode) // Use switch should be faster than if-else
+        switch (temp = nodes[_ind(i, j)].getParent()) // Use switch should be faster than if-else
         {
-        case Direction::Up: // Goes down to get to lastNode
+        case 'u': // Goes down to get to lastNode
             ++i;
             break;
-        case Direction::Down:
+        case 'd':
             --i;
             break;
-        case Direction::Left:
+        case 'l':
             ++j;
             break;
-        case Direction::Right:
+        case 'r':
             --j;
             break;
         default:
-            assert(temp != Direction::Unset);
+            break;
         }
-        route.emplace_back(temp);
+        route.push_back(temp);
     }
     for (auto it = route.rbegin(); it != route.rend(); ++it)
         std::cout << *it;
