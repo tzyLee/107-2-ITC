@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <queue>
 #include <type_traits>
 #include <vector>
@@ -27,7 +28,7 @@ double *real_h;
 
 void readParameters()
 {
-    ifstream ifs("input/problem1/input2", ifstream::binary); // TODO change to original
+    ifstream ifs("input/problem1/input3", ifstream::binary); // TODO change to original
 
     ifs.read((char *)&m, sizeof(int));
     ifs.read((char *)&n, sizeof(int));
@@ -77,9 +78,11 @@ struct MinHeap : public std::priority_queue<Member, std::vector<Member>, greater
     }
     void update(const Member &target) // key of target should be updated
     {
-        auto res = std::find(Super::c.cbegin(), Super::c.cend(), target); // remove and push
+        auto res = std::find(Super::c.cbegin(), Super::c.cend(), target);
         assert(res != Super::c.cend());
-        Super::c.erase(res);
+        for (auto index = std::distance(Super::c.cbegin(), res); index; index /= 2) // Bubble up
+            Super::c[index] = Super::c[index / 2];
+        this->pop(); // Remove top
         this->push(target);
     }
 };
@@ -123,7 +126,7 @@ int main()
 {
 #define WIDTH (m + 1)
 #define HEIGHT (n + 1)
-#define _ind(i, j) ((i)*HEIGHT + (j))
+#define _ind(i, j) ((i)*WIDTH + (j))
     readParameters();
     /***************************
      *
