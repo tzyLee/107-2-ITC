@@ -1,7 +1,9 @@
+/* Use 0 if Result is negative */
+maxSum(X, Sum):-
+    maxSumStartWithHead(X, Result), Sum is max(Result, 0).
 /* Reversed kadane's algorithm */
 /* Base case*/
-maxSum([],0).
-/* Maximum subarray sum starts with X = X or X + maxSum(Xs)
-max(Result, 0) to deal with negative number*/
-maxSum([X|Xs],Sum):-
-    maxSum(Xs,RestSum), Sum is max(max(X, X+RestSum), 0).
+maxSumStartWithHead([],0).
+/* Maximum subarray sum starts with X = X or X + maxSumStartWithHead(Xs)*/
+maxSumStartWithHead([X|Xs],Sum):-
+    maxSumStartWithHead(Xs,RestSum), Sum is max(X, X+RestSum), 0).
