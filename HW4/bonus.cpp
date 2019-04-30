@@ -26,7 +26,7 @@ int main()
     bool *table = new bool[WIDTH * HEIGHT];
     // Pseudo polynomial time algorithm
     // table[i, j]: there is a subset of [0..i-1] with sum equals to j
-    for (unsigned i = 1; i < HEIGHT; ++i) // sum 0 is always possible
+    for (unsigned i = 0; i < HEIGHT; ++i) // sum 0 is always possible
         table[_ind(i, 0)] = true;
     std::fill(table + 1, table + WIDTH, false); // When subset is [0..0], only sum 0 is possible
     for (unsigned i = 1; i < HEIGHT; ++i)
@@ -36,7 +36,7 @@ int main()
             table[_ind(i, j)] = table[_ind(i - 1, j)];
             // [0..i-2] have a subset with sum = sum
             if (tasks[i - 1] <= j) // Non-negative number
-                table[_ind(i, j)] |= table[_ind(i, j - tasks[i - 1])];
+                table[_ind(i, j)] |= table[_ind(i - 1, j - tasks[i - 1])];
             // or [0..i-2] have a subset with sum = sum - tasks[i-1]
         }
     unsigned long long largestPossibleSum = 0;
@@ -53,10 +53,10 @@ int main()
         // table[i, j] is true
         if (table[_ind(i - 1, j)]) // not include tasks[i - 1], group 2
         {
-            --i;
             group2.push_back(tasks[i - 1]);
+            --i;
         }
-        else if (j >= tasks[i - 1] && table[_ind(i, j - tasks[i - 1])]) // include tasks[i-1], group1
+        else if (tasks[i - 1] <= j && table[_ind(i - 1, j - tasks[i - 1])]) // include tasks[i-1], group1
         {
             j -= tasks[i - 1];
             std::cout << tasks[i - 1] << ' ';
