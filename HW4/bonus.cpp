@@ -47,19 +47,15 @@ int main()
     std::vector<unsigned> group2;
     group2.reserve(sum - largestPossibleSum);
     // Backtrace
-    unsigned i = n, j = largestPossibleSum;
-    while (i > 0 || j != 0)
+    for (unsigned i = n, j = largestPossibleSum; i > 0 || j > 0;)
     {
         // table[i, j] is true
         if (table[_ind(i - 1, j)]) // not include tasks[i - 1], group 2
-        {
-            group2.push_back(tasks[i - 1]);
-            --i;
-        }
+            group2.push_back(tasks[--i]);
         else if (tasks[i - 1] <= j && table[_ind(i - 1, j - tasks[i - 1])]) // include tasks[i-1], group1
         {
             j -= tasks[i - 1];
-            std::cout << tasks[i - 1] << ' ';
+            std::cout << tasks[--i] << ' ';
         }
     }
     std::cout.put('\n');
