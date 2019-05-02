@@ -5,8 +5,6 @@
 
 int main()
 {
-#define HEIGHT (n + 1)
-#define WIDTH (sum / 2 + 1) // Only half is needed
 #define _ind(i, j) ((i)*WIDTH + (j))
 #define absDiff(a, b) ((a) > (b) ? (a) - (b) : (b) - (a))
     // Initialize
@@ -22,6 +20,8 @@ int main()
         tasks.push_back(temp);
         sum += temp;
     }
+    const unsigned HEIGHT = n + 1;
+    const unsigned long long WIDTH = sum / 2 + 1;
     // Row: [0..n/2] col: [0..n/2]
     bool *table = new bool[WIDTH * HEIGHT];
     // Pseudo polynomial time algorithm
