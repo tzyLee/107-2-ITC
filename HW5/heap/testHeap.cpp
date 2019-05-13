@@ -1,13 +1,11 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 using namespace std;
 
 #include "heap.h"
 
-int main()
-{
-
+int main() {
     Heap<int, char> heap;
 
     ifstream file("input.txt");
@@ -18,25 +16,24 @@ int main()
     int *key = new int[heapNum];
     char *element = new char[heapNum];
 
-    for (int i=0; i<heapNum; ++i) {
+    for (int i = 0; i < heapNum; ++i) {
         file >> key[i];
         file >> element[i];
     }
     int index = 0;
-    for (int i=0; i<opNum; ++i) {
+    for (int i = 0; i < opNum; ++i) {
         int op;
         file >> op;
         if (op == 1) {
             heap.push(key[index], element[index]);
             ++index;
-        }
-        else 
+        } else
             heap.pop();
     }
 
     file.close();
-    delete []element;
-    delete []key;
+    delete[] element;
+    delete[] key;
 
     heap.printArray();
 
@@ -44,5 +41,3 @@ int main()
 
     return 0;
 }
-
-

@@ -24,7 +24,7 @@ double *real_h;
 
 void readParameters()
 {
-    ifstream ifs("input/problem1/input3", ifstream::binary); // TODO change to original
+    ifstream ifs("input", ifstream::binary);
 
     ifs.read((char *)&m, sizeof(int));
     ifs.read((char *)&n, sizeof(int));

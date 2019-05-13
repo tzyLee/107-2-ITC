@@ -8,18 +8,14 @@ int main()
 #define _ind(i, j) ((i)*WIDTH + (j))
 #define absDiff(a, b) ((a) > (b) ? (a) - (b) : (b) - (a))
     // Initialize
-    std::ifstream ifs("input.txt");
-    std::vector<unsigned> tasks;
+    std::ifstream ifs("input.txt", std::ios::in | std::ios::binary);
     unsigned long long sum = 0;
     unsigned n;
-    ifs >> n;
-    tasks.reserve(n);
-    for (unsigned i = 0, temp = 0; i < n; ++i)
-    {
-        ifs >> temp;
-        tasks.push_back(temp);
-        sum += temp;
-    }
+    ifs.read(reinterpret_cast<char *>(&n), sizeof(int));
+    std::vector<unsigned> tasks(n);
+    ifs.read(reinterpret_cast<char *>(tasks.data()), n * sizeof(int));
+    for (unsigned i = 0; i < n; ++i)
+        sum += tasks[i];
     const unsigned HEIGHT = n + 1;
     const unsigned long long WIDTH = sum / 2 + 1;
     // Row: [0..n/2] col: [0..n/2]
