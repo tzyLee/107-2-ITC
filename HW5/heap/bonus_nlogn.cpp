@@ -1,69 +1,10 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
-
-#include "heap.h"  // For HEAPSIZE
-
-template <class Node>
-struct MinHeap {
-   public:
-    MinHeap() : _array(new Node[HEAPSIZE]), _size(0) {}
-    ~MinHeap() { delete[] _array; }
-    void push(const Node &node) {
-        // Assume size does not exceed HEAPSIZE
-        unsigned pos = _size++;  // Position to put the new element
-        for (unsigned parent = (pos - 1) / 2; pos && _array[parent] > node;
-             pos = parent, parent = (pos - 1) / 2)
-            _array[pos] = _array[parent];  // Swap with parent
-        _array[pos] = node;                // Put new Node into array
-    }
-    void pop() {
-        // Assume there exists at least one element in heap
-        --_size;
-        _array[0] = _array[_size];  // Move last to top
-        unsigned pos = 0;           // Position to put the last element
-        for (unsigned smallest = 0;;) {
-            unsigned left = 2 * pos + 1, right = left + 1;
-            if (left < _size && _array[left] < _array[smallest])
-                smallest = left;
-            if (right < _size && _array[right] < _array[smallest])
-                smallest = right;
-            if (smallest == pos)
-                break;
-            swap(pos, smallest);
-            pos = smallest;
-        }
-    }
-    unsigned size() const { return _size; }
-    bool empty() const { return _size == 0; }
-    const Node &top() const { return _array[0]; }
-
-   private:
-    void swap(unsigned i, unsigned j) {
-        Node temp = _array[i];
-        _array[i] = _array[j];
-        _array[j] = temp;
-    }
-
-   protected:
-    Node *_array;
-    unsigned _size;
-};
-
-struct Counter {
-    unsigned _freq;
-    const std::string *_word;
-    bool operator<(const Counter &other) {
-        return _freq != other._freq ? _freq > other._freq
-                                    : *_word < *other._word;
-    }
-    bool operator>(const Counter &other) {
-        return _freq != other._freq ? _freq < other._freq
-                                    : *_word > *other._word;
-    }
-};
 
 int main() {
     std::ifstream ifs("bonus.txt");
@@ -80,17 +21,18 @@ int main() {
     while (ifs && ifs >> temp)  // Count word frequency
         ++freq[std::move(temp)];
 
-    MinHeap<Counter> minHeap;
-    for (auto &&i : freq) {  // Add all pair to vector
-        minHeap.push(Counter{i.second, &i.first});
-    }
+    using Counter = std::pair<std::string, unsigned>;
+    std::vector<Counter> container;
+    for (auto &&i : freq)  // Add all pair to vector
+        container.emplace_back(std::move(i.first), i.second);
 
-    std::vector<const std::string *> reversed;
-    reversed.reserve(k);
-    for (int i = 0; i < k; ++i) {  // Pop top k from heap
-        std::cout << *minHeap.top()._word << ' ';
-        minHeap.pop();
-    }
+    std::sort(container.begin(), container.end(),
+              [](const Counter &a, const Counter &b) {
+                  return a.second != b.second ? a.second > b.second
+                                              : a.first < b.first;
+              });
+    for (unsigned i = 0; i < k; ++i)
+        std::cout << container[i].first << ' ';
     std::cout.flush();
     return 0;
 }
