@@ -70,9 +70,6 @@ int main() {
     std::unordered_map<std::string, unsigned> freq;
     std::string temp;
     unsigned k = 0;
-    for (char temp; (temp = ifs.peek()); ifs.get())  // TODO remove this
-        if (temp >= '0' && temp <= '9')
-            break;
 
     ifs >> k;  // Get number of words to output
     freq.reserve(k);
