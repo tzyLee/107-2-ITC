@@ -1,22 +1,22 @@
-#ifndef __pyb07901xxx_h__
-#define __pyb07901xxx_h__
+#ifndef __pyb06901145_h__
+#define __pyb06901145_h__
 
-//!! TODO 1: modify the ifndef/define protection as your ID like "__pyb07901xxx_h__"
+//!! TODO 1: modify the ifndef/define protection as your ID like "__pyb06901145_h__"
 
 #include "../PolicyMaker.h"
 #include <fstream>
 
 
 //!! TODO 2: please change the file name to your ID
-const char studentID[100]="pyb07901xxx";
+const char studentID[100]="pyb06901145";
 
-//!! TODO 3: rename your agent class name as "Agent_pyb07901xxx" with your own student ID
-class Agent_pyb07901xxx:public PolicyMaker{
+//!! TODO 3: rename your agent class name as "Agent_pyb06901145" with your own student ID
+class Agent_pyb06901145:public PolicyMaker{
 public:
 //!! TODO 4: put your student ID for the constructor of PolicyMaker (the base class)
 // you can have argument(s), but all these argument(s) must have their default value
 
-    Agent_pyb07901xxx():PolicyMaker("pyb07901xxx"){}
+    Agent_pyb06901145():PolicyMaker("pyb06901145"){}
 
     Action getMove(int r){
         //2/6%: just go ahead

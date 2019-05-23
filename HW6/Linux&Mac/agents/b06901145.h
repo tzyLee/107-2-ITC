@@ -1,16 +1,16 @@
-#ifndef __b07901xxx_h__
-#define __b07901xxx_h__
+#ifndef __b06901145_h__
+#define __b06901145_h__
 
-//!! TODO 1: modify the ifndef/define protection as your ID like "__b07901xxx_h__"
+//!! TODO 1: modify the ifndef/define protection as your ID like "__b06901145_h__"
 
 #include "../PolicyMaker.h"
 
-//!! TODO 2: rename your agent class name as "Agent_b07901xxx" with your own student ID
-class Agent_b07901xxx:public PolicyMaker{
+//!! TODO 2: rename your agent class name as "Agent_b06901145" with your own student ID
+class Agent_b06901145:public PolicyMaker{
 public:
     //!! TODO 3: put your student ID for the constructor of PolicyMaker (the base class)
     // you can have argument(s), but all these argument(s) must have their default value
-    Agent_b07901xxx():PolicyMaker("b07901xxx"){}
+    Agent_b06901145():PolicyMaker("b06901145"){}
 
     //{ ===== you can add any member functions and datas here =====
     //but don't use any static data!!!
@@ -63,4 +63,4 @@ public:
     }
 };
 
-#endif //__b07901xxx_h__
+#endif //__b06901145_h__

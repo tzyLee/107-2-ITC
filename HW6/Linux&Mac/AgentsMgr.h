@@ -6,8 +6,8 @@
 #include<cstdio>
 //!! TODO 1: put your h/cpp files in "agents" folder
 //!! TODO 2: include your b07901xxx.h file here
-#include "agents/b07901xxx.h"
-#include "agents/pyb07901xxx.h"
+#include "agents/b06901145.h"
+#include "agents/pyb06901145.h"
 
 // function pionter
 typedef PolicyMaker* (*pfNewAgent)(void);
@@ -25,7 +25,7 @@ public:
         //!! TODO 3: add your agent class "Agent_b05901xxx" in a new push_back, so TA can "new" your agent
         // number of snakes should be 4 !!!  
 
-        pAllNewAgentFunc.push_back(&fNewAgent<Agent_b07901xxx>);// for c++ agent
+        pAllNewAgentFunc.push_back(&fNewAgent<Agent_b06901145>);// for c++ agent
         //pAllNewAgentFunc.push_back(&fNewAgent<Agent_pyb07901xxx>);// for python agent
 
         pAllNewAgentFunc.push_back(&fNewAgent<RandomAgent>);
