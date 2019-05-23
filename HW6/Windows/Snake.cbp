@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Snake" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Snake" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Snake" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="pdcurs34" />
+			<Add directory="./" />
+		</Compiler>
+		<Unit filename="AgentsMgr.h" />
+		<Unit filename="Food.h" />
+		<Unit filename="Game.cpp" />
+		<Unit filename="Game.h" />
+		<Unit filename="Map.cpp" />
+		<Unit filename="Map.h" />
+		<Unit filename="PolicyMaker.cpp" />
+		<Unit filename="PolicyMaker.h" />
+		<Unit filename="Snake.h" />
+		<Unit filename="Team.h" />
+		<Unit filename="basic.cpp" />
+		<Unit filename="basic.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="pdcurs34/curses.h" />
+		<Unit filename="pdcurs34/curspriv.h" />
+		<Unit filename="pdcurs34/panel.h" />
+		<Unit filename="pdcurs34/pdcurses/addch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/addchstr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/addstr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/attr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/beep.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/bkgd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/border.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/clear.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/color.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/debug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/delch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/deleteln.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/deprec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/getch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/getstr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/getyx.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/inch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/inchstr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/initscr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/inopts.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/insch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/insstr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/instr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/kernel.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/keyname.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/mouse.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/move.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/outopts.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/overlay.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/pad.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/panel.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/printw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/refresh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/scanw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/scr_dump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/scroll.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/slk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/termattr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/terminfo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/touch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/util.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/pdcurses/window.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/term.h" />
+		<Unit filename="pdcurs34/win32/pdcclip.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdcdisp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdcgetsc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdckbd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdcscrn.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdcsetsc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdcurses.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdcutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="pdcurs34/win32/pdcwin.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

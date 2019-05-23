@@ -1,0 +1,302 @@
+# depslib dependency file v1.0
+1496191520 source:c:\users\edwar\onedrive\桌面\windows_v2\basic.cpp
+	"basic.h"
+	<string>
+	<cstdio>
+	<cstdarg>
+	<cstring>
+
+1557679958 c:\users\edwar\onedrive\桌面\windows_v2\basic.h
+	"curses.h"
+	<ctime>
+	<cstdio>
+	<cstdlib>
+	<string>
+	<iostream>
+
+1216196006 c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\curses.h
+	<stdarg.h>
+	<stddef.h>
+	<stdio.h>
+	<wchar.h>
+
+1558427924 source:c:\users\edwar\onedrive\桌面\windows_v2\main.cpp
+	<cstdlib>
+	<ctime>
+	"Game.h"
+
+1558432768 c:\users\edwar\onedrive\桌面\windows_v2\game.h
+	"basic.h"
+	"Map.h"
+	"Food.h"
+	"Snake.h"
+	"Team.h"
+	"PolicyMaker.h"
+	"AgentsMgr.h"
+	<vector>
+
+1557622462 c:\users\edwar\onedrive\桌面\windows_v2\map.h
+	"basic.h"
+	<string>
+	<iostream>
+	<fstream>
+
+1557292640 c:\users\edwar\onedrive\桌面\windows_v2\food.h
+	<list>
+	"basic.h"
+
+1557296768 c:\users\edwar\onedrive\桌面\windows_v2\snake.h
+	"basic.h"
+	<vector>
+	"Team.h"
+	"Food.h"
+
+1496191520 c:\users\edwar\onedrive\桌面\windows_v2\team.h
+	"basic.h"
+	<vector>
+
+1557277368 c:\users\edwar\onedrive\桌面\windows_v2\policymaker.h
+	<vector>
+	<cstdlib>
+	<cstring>
+	<string>
+	<iostream>
+	"basic.h"
+	"Map.h"
+	"Snake.h"
+	"Food.h"
+
+1558436939 c:\users\edwar\onedrive\桌面\windows_v2\agentsmgr.h
+	<vector>
+	<string>
+	<cstdio>
+	"agents/b07901xxx.h"
+	"agents/pyb07901xxx.h"
+	"agents/b05901101.h"
+
+1496890818 c:\users\edwar\onedrive\桌面\windows_v2\agents\b05901xxx.h
+	"../PolicyMaker.h"
+
+1496370528 c:\users\edwar\onedrive\桌面\windows_v2\agents\b05901000.h
+	"../PolicyMaker.h"
+
+1496191520 source:c:\users\edwar\onedrive\桌面\windows_v2\map.cpp
+	<cstdlib>
+	"basic.h"
+	"Map.h"
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\addch.c
+	<curspriv.h>
+
+1216019296 c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\curspriv.h
+	<config.h>
+	<curses.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\addchstr.c
+	<curspriv.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\addstr.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\attr.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\beep.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\bkgd.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\border.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\clear.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\color.c
+	<curspriv.h>
+	<stdlib.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\debug.c
+	<curspriv.h>
+	<string.h>
+	<sys/types.h>
+	<time.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\delch.c
+	<curspriv.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\deleteln.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\deprec.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\getch.c
+	<curspriv.h>
+
+1216063492 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\getstr.c
+	<curspriv.h>
+
+1216196006 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\getyx.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\inch.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\inchstr.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\initscr.c
+	<curspriv.h>
+	<stdlib.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\inopts.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\insch.c
+	<curspriv.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\insstr.c
+	<curspriv.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\instr.c
+	<curspriv.h>
+
+1216196006 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\kernel.c
+	<curspriv.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\keyname.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\mouse.c
+	<curspriv.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\move.c
+	<curspriv.h>
+
+1216092134 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\outopts.c
+	<curspriv.h>
+
+1216092924 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\overlay.c
+	<curspriv.h>
+
+1216092134 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\pad.c
+	<curspriv.h>
+	<string.h>
+
+1216092924 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\panel.c
+	<curspriv.h>
+	<panel.h>
+	<stdlib.h>
+
+1216019296 c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\panel.h
+	<curses.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\printw.c
+	<curspriv.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\refresh.c
+	<curspriv.h>
+	<string.h>
+
+1216092134 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\scanw.c
+	<curspriv.h>
+	<string.h>
+	<stdlib.h>
+	<ctype.h>
+	<limits.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\scr_dump.c
+	<curspriv.h>
+	<stdlib.h>
+	<string.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\scroll.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\slk.c
+	<curspriv.h>
+	<stdlib.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\termattr.c
+	<curspriv.h>
+	<string.h>
+	<limits.h>
+
+1216697360 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\terminfo.c
+	<curspriv.h>
+	<term.h>
+
+1216019296 c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\term.h
+	<curses.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\touch.c
+	<curspriv.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\util.c
+	<curspriv.h>
+	<string.h>
+	<stdlib.h>
+
+1216019298 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\pdcurses\window.c
+	<curspriv.h>
+	<stdlib.h>
+
+1216063492 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcclip.c
+	"pdcwin.h"
+
+1215984992 c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcwin.h
+	<windows.h>
+	<curspriv.h>
+
+1216063492 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcdisp.c
+	"pdcwin.h"
+	<stdlib.h>
+	<string.h>
+
+1216063492 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcgetsc.c
+	"pdcwin.h"
+
+1216638724 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdckbd.c
+	"pdcwin.h"
+
+1216638724 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcscrn.c
+	"pdcwin.h"
+
+1216063492 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcsetsc.c
+	"pdcwin.h"
+
+1194535848 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcurses.rc
+	"winver.h"
+
+1216063492 source:c:\users\edwar\onedrive\桌面\windows_v2\pdcurs34\win32\pdcutil.c
+	"pdcwin.h"
+
+1496191520 source:c:\users\edwar\onedrive\桌面\windows_v2\policymaker.cpp
+	"PolicyMaker.h"
+
+1558302110 source:c:\users\edwar\onedrive\桌面\windows_v2\game.cpp
+	"basic.h"
+	"Game.h"
+	<cstdlib>
+	<iostream>
+
+1558431056 c:\users\edwar\onedrive\桌面\windows_v2\agents\b07901xxx.h
+	"../PolicyMaker.h"
+
+1558438164 c:\users\edwar\onedrive\桌面\windows_v2\agents\pyb07901xxx.h
+	"../PolicyMaker.h"
+	<fstream>
+
+1558302838 c:\users\edwar\onedrive\桌面\windows_v2\agents\b05901101.h
+	"../PolicyMaker.h"
+
