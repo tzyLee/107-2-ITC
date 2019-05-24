@@ -29,7 +29,7 @@ void Game::game_special0_init(int randSeed, int aiAgent) {
 
     pSnakes = new Snake*[sankeNum];
     pSnakes[0] = new Snake(387, R_Act, map, teamMgr.setToTeam(0));
-    pSnakes[1] = new Snake(116, D_Act, map, teamMgr.setToTeam(1));
+    pSnakes[1] = new Snake(320, D_Act, map, teamMgr.setToTeam(1));
     pSnakes[2] = new Snake(425, D_Act, map, teamMgr.setToTeam(1));
     pSnakes[3] = new Snake(718, D_Act, map, teamMgr.setToTeam(1));
 
@@ -73,7 +73,7 @@ void Game::game_standard_init(int randSeed) {  // standard game
 
     pSnakes = new Snake*[sankeNum];
     pSnakes[0] = new Snake(387, R_Act, map, teamMgr.setToTeam(0));
-    pSnakes[1] = new Snake(116, D_Act, map, teamMgr.setToTeam(1));
+    pSnakes[1] = new Snake(320, D_Act, map, teamMgr.setToTeam(1));
     pSnakes[2] = new Snake(425, D_Act, map, teamMgr.setToTeam(2));
     pSnakes[3] = new Snake(718, D_Act, map, teamMgr.setToTeam(3));
 
@@ -124,9 +124,9 @@ void Game::plot(int viewL) {  // viewL==0 : global view, else agent0's view
     for (int i = 0; i < sankeNum; ++i) {
         printw("Snake%d's length: %d\n", i, pSnakes[i]->getBody().size());
     }
-    
+
     printw("\n");
-    
+
 
     printw("%s", DebuggingMessage.c_str());
 
@@ -152,8 +152,8 @@ bool Game::update(bool showGame, int viewL) {
             pSnakes[i]->remove(map);
             continue;
         }
-      
-       
+
+
         pSnakes[i]->receiveAction(pAgents[i]->actionToDo(keyPress));
         pSnakes[i]->update(map, timer);
     }
@@ -198,12 +198,12 @@ bool Game::update(bool showGame, int viewL) {
         plot(viewL);
 
     // check end of the game?  return toContinue
-    
+
     int teamsRemain = teamMgr.getTeamCount();
     for (int i = 0, s = teamsRemain; i < s; ++i)
         if (teamMgr.getSnakeNum(i) <= 0)
             --teamsRemain;
-    
+
     //printw("teamsRemain: %d\n", teamsRemain);
     if (teamsRemain <= 0)
         return false;
@@ -211,7 +211,7 @@ bool Game::update(bool showGame, int viewL) {
         --timer;
         return timer > 0;
     }
-     
+
 }
 
 void Game::humanGame(int randSeed, int aiAgent, int viewL) {
@@ -228,7 +228,7 @@ void Game::singleGame(int randSeed, bool showGame) {
 }
 void Game::battleAll(const char* dumpFileName, bool showGame) {
 static int gameStageCount = 10;
-static int gameStage[10] = {1 ,2, 6, 24, 120, 720 ,5040 ,362880 ,3628800 ,39916800};  // 1543
+static int gameStage[10] = {1, 2, 6, 24, 120, 720, 5040 ,362880 ,3628800, 39916800};  // 1543
 
 	int size = agntsMgr.pAllNewAgentFunc.size();
 
@@ -241,7 +241,7 @@ static int gameStage[10] = {1 ,2, 6, 24, 120, 720 ,5040 ,362880 ,3628800 ,399168
 	for (int k = 0; k < gameStageCount; ++k) {
 		game_standard_init( gameStage[k]);
 		playing(showGame);
-	
+
 
 
 		for( int i = 0 ; i < 4 ; i++){

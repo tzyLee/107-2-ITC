@@ -20,13 +20,13 @@ class view:
     def getFood(self,rad):
         isFood = []
         if rad == 1 :
-            for x in {16,17,18,23,24,25,30,31,32} :
+            for x in [16,17,18,23,24,25,30,31,32] :
                 if self.map[x] == ".":
                     isFood = isFood + [1]
                 else:
                     isFood = isFood + [0]
         elif rad == 2 :
-            for x in {8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,36,37,38,39,40} :
+            for x in [8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,36,37,38,39,40] :
                 if self.map[x] == ".":
                     isFood = isFood + [1]
                 else:
@@ -44,13 +44,13 @@ class view:
     def getWall(self,rad):
         isWall = []
         if rad == 1 :
-            for x in {16,17,18,23,24,25,30,31,32} :
+            for x in [16,17,18,23,24,25,30,31,32] :
                 if self.map[x] == "#":
                     isWall = isWall + [1]
                 else:
                     isWall = isWall + [0]
         elif rad == 2 :
-            for x in {8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,36,37,38,39,40} :
+            for x in [8,9,10,11,12,15,16,17,18,19,22,23,24,25,26,29,30,31,32,33,36,37,38,39,40] :
                 if self.map[x] == "#":
                     isWall = isWall + [1]
                 else:

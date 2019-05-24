@@ -59,7 +59,7 @@ public:
 
         string viewStr=view.getMapStr();
 
-        char file[100];
+        char file[50]="";
         strcat(file,"agents/");
         strcat(file,studentID);
         strcat(file,".txt");
@@ -68,7 +68,7 @@ public:
         strcat(command,studentID);
         strcat(command,".py  agents/");
         strcat(command,studentID);
-        strcat(command,".py");
+        strcat(command,".txt");
         strToFile(viewStr,file);
         FILE * fp;
     	char buffer[80]="";

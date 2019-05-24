@@ -29,7 +29,7 @@ void Game::game_special0_init(int randSeed, int aiAgent) {
 
     pSnakes = new Snake*[sankeNum];
     pSnakes[0] = new Snake(387, R_Act, map, teamMgr.setToTeam(0));
-    pSnakes[1] = new Snake(116, D_Act, map, teamMgr.setToTeam(1));
+    pSnakes[1] = new Snake(320, D_Act, map, teamMgr.setToTeam(1));
     pSnakes[2] = new Snake(425, D_Act, map, teamMgr.setToTeam(1));
     pSnakes[3] = new Snake(718, D_Act, map, teamMgr.setToTeam(1));
 
@@ -73,7 +73,7 @@ void Game::game_standard_init(int randSeed) {  // standard game
 
     pSnakes = new Snake*[sankeNum];
     pSnakes[0] = new Snake(387, R_Act, map, teamMgr.setToTeam(0));
-    pSnakes[1] = new Snake(116, D_Act, map, teamMgr.setToTeam(1));
+    pSnakes[1] = new Snake(320, D_Act, map, teamMgr.setToTeam(1));
     pSnakes[2] = new Snake(425, D_Act, map, teamMgr.setToTeam(2));
     pSnakes[3] = new Snake(718, D_Act, map, teamMgr.setToTeam(3));
 

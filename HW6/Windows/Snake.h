@@ -75,7 +75,7 @@ class Snake {
                 map[*it] = '#';
                 break;
             case 1:
-                map[*it] = '.';
+                map[*it] = ' ';
                 break;
             case 2:
                 map[*it] = ' ';
