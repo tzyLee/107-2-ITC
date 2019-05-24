@@ -133,8 +133,9 @@ class Agent_b06901145 : public PolicyMaker {
             return Action::L_Act;
         if (nearestFoodX > 3 && choice[3])
             return Action::R_Act;
-        // Starvation, prioritize right and down
+        // Starvation
         if (_starvation > 15) {
+            int deltaX = 0, deltaY = 0;
             if (choice[3]) {
                 _starvation -= 5;
                 return Action::R_Act;
@@ -143,25 +144,47 @@ class Agent_b06901145 : public PolicyMaker {
                 return Action::D_Act;
             }
         }
-        int sum = choice[0] + choice[1] + choice[2] + choice[3];
+        // Rate choice based on number of dangerous block
+        unsigned rating[4] = {0, 0, 0, 0};
+        if (choice[0])
+            rating[0] = rate(Action::U_Act);
+        if (choice[1])
+            rating[1] = rate(Action::D_Act);
+        if (choice[2])
+            rating[2] = rate(Action::L_Act);
+        if (choice[3])
+            rating[3] = rate(Action::R_Act);
+        // Player head detection
+        if (view[16] == '@') {
+            rating[0] = rating[0] > 5 ? rating[0] - 5 : 0;
+            rating[2] = rating[2] > 5 ? rating[2] - 5 : 0;
+        }
+        if (view[18] == '@') {
+            rating[0] = rating[0] > 5 ? rating[0] - 5 : 0;
+            rating[3] = rating[3] > 5 ? rating[3] - 5 : 0;
+        }
+        if (view[30] == '@') {
+            rating[1] = rating[1] > 5 ? rating[1] - 5 : 0;
+            rating[2] = rating[2] > 5 ? rating[2] - 5 : 0;
+        }
+        if (view[32] == '@') {
+            rating[1] = rating[1] > 5 ? rating[1] - 5 : 0;
+            rating[3] = rating[3] > 5 ? rating[3] - 5 : 0;
+        }
+        int sum = rating[0] + rating[1] + rating[2] + rating[3];
         if (sum) {
-            int random = rand() % sum;
+            int random = rand() % sum, lowerBound = 0;
             // Choose available action
-            int i = 0;
-            for (int truthy = 0; i < 4; ++i) {
-                if (choice[i]) {
-                    if (random == truthy)
-                        break;
-                    ++truthy;
-                }
-            }
-            if (i == 0)
+            if (choice[0] && random < rating[0])
                 return Action::U_Act;
-            if (i == 1)
+            lowerBound += rating[0];
+            if (choice[1] && lowerBound <= random < lowerBound + rating[1])
                 return Action::D_Act;
-            if (i == 2)
+            lowerBound += rating[1];
+            if (choice[2] && lowerBound <= random < lowerBound + rating[2])
                 return Action::L_Act;
-            if (i == 3)
+            lowerBound += rating[2];
+            if (choice[3] && lowerBound <= random)
                 return Action::R_Act;
         }
         return Action::R_Act;
@@ -191,6 +214,37 @@ class Agent_b06901145 : public PolicyMaker {
         }
         map[7 * y + x] = temp;
         return false;
+    }
+
+    unsigned rate(Action action) {
+        int count = 0;
+        switch (action) {
+            case Action::U_Act:
+                for (int i = 0; i < 21; ++i)
+                    if (!dangerous(i))
+                        ++count;
+                return count;
+            case Action::D_Act:
+                for (int i = 28; i < 49; ++i)
+                    if (!dangerous(i))
+                        ++count;
+                return count;
+            case Action::L_Act:
+                for (int i = 0; i < 7; ++i)
+                    for (int j = 0; j < 3; ++j)
+                        if (!dangerous(7 * i + j))
+                            ++count;
+                return count;
+            case Action::R_Act:
+                for (int i = 0; i < 7; ++i)
+                    for (int j = 4; j < 7; ++j)
+                        if (!dangerous(7 * i + j))
+                            ++count;
+                return count;
+
+            default:
+                return 0;
+        }
     }
     // bool safe(chtype map[49], Action action, int depth = 0) {
     //     if (map[17] == 'x' || map[23] == 'x' || map[31] == 'x' ||
