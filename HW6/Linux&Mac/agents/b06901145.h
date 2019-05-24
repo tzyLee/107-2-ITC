@@ -84,12 +84,12 @@ class Agent_b06901145 : public PolicyMaker {
         //     std::cerr << '\n' << '\n';
         // }
 
-        for (int i = 0; i < 7; ++i) {
-            for (int j = 0; j < 7; ++j) {
-                std::cerr << static_cast<char>(view[7 * i + j]);
-            }
-            std::cerr << '\n';
-        }
+        // for (int i = 0; i < 7; ++i) {
+        //     for (int j = 0; j < 7; ++j) {
+        //         std::cerr << static_cast<char>(view[7 * i + j]);
+        //     }
+        //     std::cerr << '\n';
+        // }
         // Avoid wall and snake
         if (dangerous(23))
             choice[2] = false;
@@ -100,13 +100,13 @@ class Agent_b06901145 : public PolicyMaker {
         if (dangerous(17))
             choice[0] = false;
         // Dead loop prevention (Only for nearby 7*7)
-        if (!safe(&view[0], 3, 2))
+        if (choice[0] && !safe(&view[0], 3, 2))
             choice[0] = false;
-        if (!safe(&view[0], 3, 4))
+        if (choice[1] && !safe(&view[0], 3, 4))
             choice[1] = false;
-        if (!safe(&view[0], 2, 3))
+        if (choice[2] && !safe(&view[0], 2, 3))
             choice[2] = false;
-        if (!safe(&view[0], 4, 3))
+        if (choice[3] && !safe(&view[0], 4, 3))
             choice[3] = false;
         // Eat nearest food
         int nearestFoodX = 3, nearestFoodY = 3;
@@ -134,7 +134,7 @@ class Agent_b06901145 : public PolicyMaker {
         if (nearestFoodX > 3 && choice[3])
             return Action::R_Act;
         // Starvation, prioritize right and down
-        if (_starvation > 10) {
+        if (_starvation > 15) {
             if (choice[3]) {
                 _starvation -= 5;
                 return Action::R_Act;
@@ -143,20 +143,27 @@ class Agent_b06901145 : public PolicyMaker {
                 return Action::D_Act;
             }
         }
-        int random = rand() % 100 < 80;
-        // Choose available action
-        if (choice[0] && random)
-            return Action::U_Act;
-        if (choice[1])
-            return Action::D_Act;
-        if (choice[2] && random)
-            return Action::L_Act;
-        if (choice[3])
-            return Action::R_Act;
-        if (choice[0])
-            return Action::U_Act;
-        if (choice[2])
-            return Action::L_Act;
+        int sum = choice[0] + choice[1] + choice[2] + choice[3];
+        if (sum) {
+            int random = rand() % sum;
+            // Choose available action
+            int i = 0;
+            for (int truthy = 0; i < 4; ++i) {
+                if (choice[i]) {
+                    if (random == truthy)
+                        break;
+                    ++truthy;
+                }
+            }
+            if (i == 0)
+                return Action::U_Act;
+            if (i == 1)
+                return Action::D_Act;
+            if (i == 2)
+                return Action::L_Act;
+            if (i == 3)
+                return Action::R_Act;
+        }
         return Action::R_Act;
     }
 
