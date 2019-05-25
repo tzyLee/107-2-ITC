@@ -1,15 +1,14 @@
 #ifndef __SNAKE_H__
 #define __SNAKE_H__
 
-#include "basic.h"
 #include <vector>
-#include "Team.h"
 #include "Food.h"
+#include "Team.h"
+#include "basic.h"
 
 class Snake {
    private:
-    
-    //std::vector<int> _finalbody;
+    // std::vector<int> _finalbody;
     Action _last;
     Action _next;
     bool _isAlive;
@@ -22,13 +21,13 @@ class Snake {
     Team m_team;
     int _finalBodyLength;
     std::vector<int> _body;
-    
+
     Snake(int initPos, Action initAct, Map& map, Team t)
-        : m_team(t), _last(initAct), _next(initAct) {
+        : _last(initAct), _next(initAct), m_team(t) {
         _body.push_back(initPos);
 
         int bodyPos;
-        switch(initAct){
+        switch (initAct) {
             case U_Act:
                 bodyPos = initPos + map.getWidth();
                 break;
@@ -41,9 +40,10 @@ class Snake {
             case R_Act:
                 bodyPos = initPos - 1;
                 break;
+            default:
+                break;
         }
         _body.push_back(bodyPos);
-        
 
         _isAlive = true;
         _eatFood = false;
@@ -59,11 +59,11 @@ class Snake {
         else
             return _body[0];
     }
-    std::vector<int> getBody() const{ return _body; }
-    //std::vector<int> getFinalBody() const {};
+    std::vector<int> getBody() const { return _body; }
+    // std::vector<int> getFinalBody() const {};
 
-    Action getNext() const{ return _next; }
-    Action getLast() const{ return _last; }
+    Action getNext() const { return _next; }
+    Action getLast() const { return _last; }
 
     bool isDead() const { return !_isAlive; }
     void remove(Map& map) {
@@ -85,8 +85,9 @@ class Snake {
         for (; it != _body.end(); it++) {
             map[*it] = '.';
         }
-        if( _body.size()>0)_finalBodyLength = _body.size();
-	
+        if (_body.size() > 0)
+            _finalBodyLength = _body.size();
+
         _body.clear();
     }
     bool hitSelfCheck() {
@@ -140,11 +141,10 @@ class Snake {
 
         if (_next != ACC_Act)
             _last = _next;
-	if(_isAlive)  _finalBodyLength = _body.size();
+        if (_isAlive)
+            _finalBodyLength = _body.size();
     }
-    void receiveAction(const Action act) {
-        _next = act;
-    }
+    void receiveAction(const Action act) { _next = act; }
     int getPos() const { return _body[0]; }
     bool isCleared() const { return _body.size() == 0; }
     int getTeamID() const { return m_team.getTeamID(); }
@@ -166,7 +166,7 @@ class Snake {
         bool con3 = (a1 == L_Act && a2 == R_Act);
         bool con4 = (a1 == R_Act && a2 == L_Act);
         bool con5 = (a1 == ACC_Act || a2 == ACC_Act);
-             //&& (_accUsedTime < timer + 100);
+        //&& (_accUsedTime < timer + 100);
         if (con1 || con2 || con3 || con4 || con5)
             return false;
         else

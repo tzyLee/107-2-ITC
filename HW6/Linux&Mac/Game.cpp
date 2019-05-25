@@ -1,5 +1,5 @@
-#include "basic.h"
 #include "Game.h"
+#include "basic.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -35,13 +35,13 @@ void Game::game_special0_init(int randSeed, int aiAgent) {
 
     pAgents = new PolicyMaker*[sankeNum];
     pAgents[0] = new HumanAgent;
-    for(int i = 1 ; i < sankeNum ; i++){
-        if( aiAgent > 3 ){
+    for (int i = 1; i < sankeNum; i++) {
+        if (aiAgent > 3) {
             printw("AI Agent could be less then 3 !");
         }
-        if( i <= aiAgent){
-            pAgents[i] = (*agntsMgr.pAllNewAgentFunc[i-1])();
-        }else{
+        if (i <= aiAgent) {
+            pAgents[i] = (*agntsMgr.pAllNewAgentFunc[i - 1])();
+        } else {
             pAgents[i] = new RandomAgent;
         }
     }
@@ -120,13 +120,11 @@ void Game::plot(int viewL) {  // viewL==0 : global view, else agent0's view
     }
      */
 
-
     for (int i = 0; i < sankeNum; ++i) {
         printw("Snake%d's length: %d\n", i, pSnakes[i]->getBody().size());
     }
 
     printw("\n");
-
 
     printw("%s", DebuggingMessage.c_str());
 
@@ -137,7 +135,7 @@ void Game::plot(int viewL) {  // viewL==0 : global view, else agent0's view
     refresh();
 }
 bool Game::update(bool showGame, int viewL) {
-    Action keyAction;
+    // Action keyAction;
 #ifndef NO_CURSES
     int keyPress = getch();
 #else
@@ -152,7 +150,6 @@ bool Game::update(bool showGame, int viewL) {
             pSnakes[i]->remove(map);
             continue;
         }
-
 
         pSnakes[i]->receiveAction(pAgents[i]->actionToDo(keyPress));
         pSnakes[i]->update(map, timer);
@@ -204,14 +201,13 @@ bool Game::update(bool showGame, int viewL) {
         if (teamMgr.getSnakeNum(i) <= 0)
             --teamsRemain;
 
-    //printw("teamsRemain: %d\n", teamsRemain);
+    // printw("teamsRemain: %d\n", teamsRemain);
     if (teamsRemain <= 0)
         return false;
     else {
         --timer;
         return timer > 0;
     }
-
 }
 
 void Game::humanGame(int randSeed, int aiAgent, int viewL) {
@@ -227,35 +223,31 @@ void Game::singleGame(int randSeed, bool showGame) {
     game_delete();
 }
 void Game::battleAll(const char* dumpFileName, bool showGame) {
-static int gameStageCount = 10;
-static int gameStage[10] = {1, 2, 6, 24, 120, 720, 5040 ,362880 ,3628800, 39916800};  // 1543
+    static int gameStageCount = 10;
+    static int gameStage[10] = {1,   2,    6,      24,      120,
+                                720, 5040, 362880, 3628800, 39916800};  // 1543
 
-	int size = agntsMgr.pAllNewAgentFunc.size();
+    int size = agntsMgr.pAllNewAgentFunc.size();
 
-	for (int i = 0; i < size; ++i)
-		for (int j = 0; j < size; ++j)
-		    agntsMgr.scores[i][j] = 0;
+    for (int i = 0; i < size; ++i)
+        for (int j = 0; j < size; ++j)
+            agntsMgr.scores[i][j] = 0;
 
+    for (int k = 0; k < gameStageCount; ++k) {
+        game_standard_init(gameStage[k]);
+        playing(showGame);
 
+        for (int i = 0; i < 4; i++) {
+            // int point = pSnakes[i]->_finalBodyLength * 10;
+            agntsMgr.agentName.push_back(pAgents[i]->getName());
+            agntsMgr.scores[i][i] += pSnakes[i]->_finalBodyLength * 10;
+            printw("Snake %d : %d points\n", i, agntsMgr.scores[i][i]);
+        }
 
-	for (int k = 0; k < gameStageCount; ++k) {
-		game_standard_init( gameStage[k]);
-		playing(showGame);
-
-
-
-		for( int i = 0 ; i < 4 ; i++){
-			int point = pSnakes[i]->_finalBodyLength*10;
-			agntsMgr.agentName.push_back(pAgents[i]->getName());
-			agntsMgr.scores[i][i] += pSnakes[i]->_finalBodyLength * 10;
-			printw("Snake %d : %d points\n",i,agntsMgr.scores[i][i]);
-		}
-
-		//printw("Please press q to exit\n");
-		//while( getch()!='q' ){}
-
-	}
-	agntsMgr.dump(dumpFileName);
+        // printw("Please press q to exit\n");
+        // while( getch()!='q' ){}
+    }
+    agntsMgr.dump(dumpFileName);
 }
 
 void Game::showEndingMsg() {
@@ -279,9 +271,10 @@ void Game::showEndingMsg() {
     score_p0 += pSnakes[0]->_finalBodyLength * 10;
     score_p1 += pSnakes[1]->_finalBodyLength * 10;
 
-    //if (win == -1)
+    // if (win == -1)
     //    printw("Match game!!\t(team 0: %d p;team 1: %d p)\n", score_p0,
     //           score_p1);
-    //else
-        printw("team %d wins!!\t(team 0: %d p;team 1: %d p)\n", win, score_p0, score_p1);
+    // else
+    printw("team %d wins!!\t(team 0: %d p;team 1: %d p)\n", win, score_p0,
+           score_p1);
 }

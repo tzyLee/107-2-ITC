@@ -14,7 +14,8 @@
 //! student ID
 class Agent_b06901145 : public PolicyMaker {
    private:
-    unsigned _starvation, _lastBodyLength;
+    unsigned _starvation;
+    int _lastBodyLength;
 
    public:
     //!! TODO 3: put your student ID for the constructor of PolicyMaker (the
@@ -135,7 +136,6 @@ class Agent_b06901145 : public PolicyMaker {
             return Action::R_Act;
         // Starvation
         if (_starvation > 15) {
-            int deltaX = 0, deltaY = 0;
             if (choice[3]) {
                 _starvation -= 5;
                 return Action::R_Act;
@@ -173,15 +173,17 @@ class Agent_b06901145 : public PolicyMaker {
         }
         int sum = rating[0] + rating[1] + rating[2] + rating[3];
         if (sum) {
-            int random = rand() % sum, lowerBound = 0;
+            unsigned random = rand() % sum, lowerBound = 0;
             // Choose available action
             if (choice[0] && random < rating[0])
                 return Action::U_Act;
             lowerBound += rating[0];
-            if (choice[1] && lowerBound <= random < lowerBound + rating[1])
+            if (choice[1] && lowerBound <= random &&
+                random < lowerBound + rating[1])
                 return Action::D_Act;
             lowerBound += rating[1];
-            if (choice[2] && lowerBound <= random < lowerBound + rating[2])
+            if (choice[2] && lowerBound <= random &&
+                random < lowerBound + rating[2])
                 return Action::L_Act;
             lowerBound += rating[2];
             if (choice[3] && lowerBound <= random)
