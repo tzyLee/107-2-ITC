@@ -37,7 +37,7 @@ void Game::game_special0_init(int randSeed, int aiAgent) {
     pAgents[0] = new HumanAgent;
     for (int i = 1; i < sankeNum; i++) {
         if (aiAgent > 3) {
-            printw("AI Agent could be less then 3 !");
+            // printw("AI Agent could be less then 3 !");
         }
         if (i <= aiAgent) {
             pAgents[i] = (*agntsMgr.pAllNewAgentFunc[i - 1])();
@@ -119,8 +119,8 @@ void Game::plot(int viewL) {  // viewL==0 : global view, else agent0's view
     } else {
         map.print();
     }
-    printw("\n");
-    printw("Time: %d\n", timer);
+    // printw("\n");
+    // printw("Time: %d\n", timer);
     /*
     for (int i = 0, s = teamMgr.getTeamCount(); i < s; ++i) {
 
@@ -131,17 +131,17 @@ void Game::plot(int viewL) {  // viewL==0 : global view, else agent0's view
     }
      */
 
-    for (int i = 0; i < sankeNum; ++i) {
-        printw("Snake%d's length: %d\n", i, pSnakes[i]->getBody().size());
-    }
+    // for (int i = 0; i < sankeNum; ++i) {
+    //     printw("Snake%d's length: %d\n", i, pSnakes[i]->getBody().size());
+    // }
 
-    printw("\n");
+    // printw("\n");
 
-    printw("%s", DebuggingMessage.c_str());
+    // printw("%s", DebuggingMessage.c_str());
 
 #ifdef NO_CURSES
-    for (int i = 0; i < 3; ++i)
-        printw("\n");
+    // for (int i = 0; i < 3; ++i)
+    //     printw("\n");
 #endif
     refresh();
 }
@@ -286,6 +286,6 @@ void Game::showEndingMsg() {
     //    printw("Match game!!\t(team 0: %d p;team 1: %d p)\n", score_p0,
     //           score_p1);
     // else
-    printw("team %d wins!!\t(team 0: %d p;team 1: %d p)\n", win, score_p0,
-           score_p1);
+    // printw("team %d wins!!\t(team 0: %d p;team 1: %d p)\n", win, score_p0,
+    //        score_p1);
 }

@@ -17,7 +17,7 @@ int main() {
     // TA: parameters: const char* dumpFileName,bool showGame=false
 
 #ifndef NO_CURSES
-    printw("Please press q to exit\n");
+    // printw("Please press q to exit\n");
     while (getch() != 'q') {
     }
 #endif

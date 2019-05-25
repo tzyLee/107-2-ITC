@@ -56,16 +56,12 @@ class Agent_pyb06901145 : public PolicyMaker {
         getSnakeInView(3);
         getFoodInView(3);
         int headPos = pSnake->getHeadPos();
-        int upperLeft = headPos - 120 * 3 - 3;
         std::string mapString(120 * 40, '?');
-        for (int i = 0; i < 7; ++i) {
-            for (int j = 0; j < 7; ++j) {
-                int index = upperLeft + 120 * i + j;
-                if (index >= 0 &&
-                    index < 120 * 40)  // prevent from 'x' segfault
-                    mapString[upperLeft + 120 * i + j] = view[i * 7 + j];
-            }
-        }
+        for (int i = 24, pos = headPos; headPos >= 0 && i >= 0; --i, --headPos)
+            mapString[pos] = view[i];
+        for (int i = 25, pos = headPos + 1; headPos < 120 * 40 && i < 49;
+             ++i, ++headPos)
+            mapString[pos] = view[i];
         for (int i = 0; i < 120; ++i)
             mapString[i] = '#';
         for (int i = 0; i < 40; ++i)
@@ -80,6 +76,9 @@ class Agent_pyb06901145 : public PolicyMaker {
             }
             mapString[snake._body[0]] = '@';
         }
+        for (auto& pos : pSnake->_body) {
+            mapString[pos] = '*';
+        }
         mapString[headPos] = '+';  // Head of player itself
         // for (int i = 0; i < 40; ++i) {
         //     for (int j = 0; j < 120; ++j)
@@ -87,8 +86,8 @@ class Agent_pyb06901145 : public PolicyMaker {
         //     std::cout << '\n';
         // }
         std::cout << mapString << std::endl;
-        std::cout.flush();
-        int res = 0;
+        int res = 10;
+        assert(std::cin.good());
         std::cin >> res;
         return getMove(res);
     }

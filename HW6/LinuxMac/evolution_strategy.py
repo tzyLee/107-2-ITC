@@ -37,7 +37,7 @@ def processData(mapStr):
 def predict(layers, map):
     assert len(map) == 120*40
     output = ReLU(layers[0] @ map + layers[1])
-    output = ReLU(layers[2] @ map + layers[3])  # U D L R
+    output = ReLU(layers[2] @ output + layers[3])  # U D L R
     ret = np.argmax(output) + 1  # +1 for pyb0X901XXX.h::getMove
     return ret
     # return np.random.choice(range(1, 5), p=result/np.sum(result)) # sample based on weight
@@ -45,26 +45,29 @@ def predict(layers, map):
 
 def reward(layers):
     pipe = Popen(['./start'], stdout=PIPE, stdin=PIPE)
-    try:
-        while not pipe.returncode:
-            pipe.poll()
-            mapString = pipe.stdout.readline().strip()
-            if len(mapString) != 120*40:  # Snake is dead (Maybe)
-                pipe.stdin.write(bytes('{}\n'.format(0), 'ascii'))
-            else:
-                map = processData(mapString)
-                pipe.stdin.write(
-                    bytes('{}\n'.format(predict(layers, map)), 'ascii'))
+    while pipe.returncode is None:
+        pipe.poll()
+        pipe.stdin.write(bytes('0\n', 'ascii'))
+        mapString = pipe.stdout.readline().strip()
+        if len(mapString) != 120*40:  # Snake is dead (Maybe)
+            pipe.stdin.write(bytes('0\n', 'ascii'))
+        else:
+            map = processData(mapString)
+            pipe.stdin.write(
+                bytes('{}\n'.format(predict(layers, map)), 'ascii'))
+        pipe.poll()
+        if pipe.returncode is None:
             pipe.stdin.flush()
+    if pipe.returncode == 0:
         with open('test.csv', 'r') as f:
             return int(f.read())
-    except:
-        return 0
+    print('Error')
+    return 0
 
 
 def train():
-    weights = np.array([np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
-                        np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])])
+    weights = np.abs(np.array([np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
+                               np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])]))
     for i in range(iteration):
         noises = np.array([[np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
                             np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])] for i in range(npop)])  # shape == (npop, len(layers))
