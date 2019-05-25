@@ -5,10 +5,10 @@ import pickle
 import numpy as np
 
 # hyperparameters
-npop = 2      # population size
+npop = 20      # population size
 sigma = 0.1    # noise standard deviation
 alpha = 0.001  # learning rate
-iteration = 1
+iteration = 10
 nprocess = 4  # number of process
 chunksize = 4
 layers = [120*40, 128, 4]
@@ -66,27 +66,36 @@ def reward(layers):
 
 
 def train():
-    weights = np.abs(np.array([np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
-                               np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])]))
-    for i in range(iteration):
-        noises = np.array([[np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
-                            np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])] for i in range(npop)])  # shape == (npop, len(layers))
-        with multiprocessing.Pool(processes=nprocess) as pool:
-            rewards = pool.map(reward, noises, chunksize)
-            pool.close()
-            pool.join()
-        rewards = np.array(rewards)
-        std = np.std(rewards)
-        if std:  # if std != 0
-            A = (rewards - np.mean(rewards)) / std  # standardize
-        else:
-            A = (rewards - np.mean(rewards))
-        for i in range(4):
-            delta = alpha/(npop*sigma) * (noises.T[i, :] * A)
-            weights[i] += delta[0]
-        print('Iteration end, max reward is', np.max(rewards))
-    with open('training_result.pickle', 'wb') as f:
-        pickle.dump(weights, f)
+    try:
+        with open('training_result.pickle', 'rb') as f:
+            weights = pickle.load(f)
+    except FileNotFoundError:
+        weights = np.abs(np.array([np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
+                                   np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])]))
+    try:
+        for i in range(iteration):
+            noises = np.array([[np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
+                                np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])] for i in range(npop)])  # shape == (npop, len(layers))
+            with multiprocessing.Pool(processes=nprocess) as pool:
+                rewards = pool.map(reward, weights + noises, chunksize)
+                pool.close()
+                pool.join()
+            rewards = np.array(rewards)
+            std = np.std(rewards)
+            if std:  # if std != 0
+                A = (rewards - np.mean(rewards)) / std  # standardize
+            else:
+                A = (rewards - np.mean(rewards))
+            for i in range(4):
+                delta = alpha/(npop*sigma) * (noises.T[i, :] * A)
+                weights[i] += delta[0]
+            print('Iteration end, max reward is', np.max(rewards))
+            if i % 10 == 0:
+                with open('training_result.pickle', 'wb') as f:
+                    pickle.dump(weights, f)
+    finally:
+        with open('training_result.pickle', 'wb') as f:
+            pickle.dump(weights, f)
 
 
 if __name__ == "__main__":
