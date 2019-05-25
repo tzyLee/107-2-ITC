@@ -1,16 +1,14 @@
-all: basic.o Map.o PolicyMaker.o Game.o main.o
-	g++ -o start basic.o Map.o PolicyMaker.o Game.o main.o -lcurses
-	
+CXXFLAGS = -g -I../ncurses-5.9/include -I/usr/include/python3.6m -Wall
+LDFLAGS = -L/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu
+all: start
+
+start: basic.o Map.o PolicyMaker.o Game.o main.o
+	$(CXX) $(CXXFLAGS) $^ -o $@  $(LDFLAGS) -lcurses -lpython3.6m
 basic.o: basic.cpp
-	g++ -g -I../ncurses-5.9/include -c basic.cpp -o basic.o
 Map.o: Map.cpp
-	g++ -g -I../ncurses-5.9/include -c Map.cpp -o Map.o
 PolicyMaker.o: PolicyMaker.cpp
-	g++ -g -I../ncurses-5.9/include -c PolicyMaker.cpp -o PolicyMaker.o
-Game.o: Game.cpp
-	g++ -g -I../ncurses-5.9/include -c Game.cpp -o Game.o
+Game.o: Game.cpp PolicyMaker.cpp AgentsMgr.h ./agents/b06901145.h ./agents/pyb06901145.h
 main.o: main.cpp
-	g++ -g -I../ncurses-5.9/include -c main.cpp -o main.o
 
 clean:
 	rm basic.o Map.o PolicyMaker.o Game.o main.o

@@ -25,11 +25,11 @@ class AgentsMgr {
 
     AgentsMgr() {
         //!! TODO 3: add your agent class "Agent_b05901xxx" in a new push_back,
-        //!so TA can "new" your agent
+        //! so TA can "new" your agent
         // number of snakes should be 4 !!!
 
         pAllNewAgentFunc.push_back(
-            &fNewAgent<Agent_b06901145>);  // for c++ agent
+            &fNewAgent<Agent_pyb06901145>);  // for c++ agent
         // pAllNewAgentFunc.push_back(&fNewAgent<Agent_pyb06901145>);// for
         // python agent
 

@@ -1,15 +1,15 @@
 #ifndef __PolicyMaker_h__
 #define __PolicyMaker_h__
 
-#include <vector>
 #include <cstdlib>
 #include <cstring>
-#include <string>
 #include <iostream>
-#include "basic.h"
+#include <string>
+#include <vector>
+#include "Food.h"
 #include "Map.h"
 #include "Snake.h"
-#include "Food.h"
+#include "basic.h"
 
 extern std::string DebuggingMessage;
 
@@ -25,7 +25,8 @@ class PolicyMaker {
     const Snake* pSnake;
     Map view;
     std::vector<Food> FoodinView;
-    // The position of snakes in SnakeinView is recorded in "theMap", not in "view".
+    // The position of snakes in SnakeinView is recorded in "theMap", not in
+    // "view".
     std::vector<Snake> SnakeinView;
 
     void pos2xy(const int pos, int& x, int& y) {
@@ -60,11 +61,8 @@ class HumanAgent : public PolicyMaker {
     int accelarate_key;
 
    public:
-    HumanAgent(int Uk = KEY_UP,
-               int Dk = KEY_DOWN,
-               int Lk = KEY_LEFT,
-               int Rk = KEY_RIGHT,
-               int fk = ' ')
+    HumanAgent(int Uk = KEY_UP, int Dk = KEY_DOWN, int Lk = KEY_LEFT,
+               int Rk = KEY_RIGHT, int fk = ' ')
         : PolicyMaker("HumanAgent") {
         U_key = Uk;
         D_key = Dk;
@@ -122,35 +120,32 @@ class RandomAgent : public PolicyMaker {
             candidates.push_back(D_Act);
         }
 
-        //Eliminate illegal actions
+        // Eliminate illegal actions
         for (int i = 0; i < candidates.size(); i++) {
-            if ( isOppDir(candidates[i], pSnake->getLast())) {
+            if (isOppDir(candidates[i], pSnake->getLast())) {
                 candidates.erase(candidates.begin() + i);
             }
         }
 
-        //If _last action is in candidates, then chose to do _last action.
+        // If _last action is in candidates, then chose to do _last action.
         for (int i = 0; i < candidates.size(); i++) {
             if (pSnake->getLast() == candidates[i]) {
                 return pSnake->getLast();
             }
         }
 
-        //Otherwise, randomly do an action
-        if (candidates.size() ==0)
+        // Otherwise, randomly do an action
+        if (candidates.size() == 0)
             candidates.push_back(pSnake->getNext());
         int r = rand() % candidates.size();
         return candidates[r];
     }
-    bool isOppDir(Action a1, Action a2){
-        if((a1 == U_Act && a2 == D_Act) ||
-            (a1 == D_Act && a2 == U_Act) ||
-            (a1 == R_Act && a2 == L_Act) ||
-            (a1 == R_Act && a2 == R_Act))
+    bool isOppDir(Action a1, Action a2) {
+        if ((a1 == U_Act && a2 == D_Act) || (a1 == D_Act && a2 == U_Act) ||
+            (a1 == R_Act && a2 == L_Act) || (a1 == R_Act && a2 == R_Act))
             return true;
         return false;
     }
-
 };
 
 #endif  //__PolicyMaker_h__
