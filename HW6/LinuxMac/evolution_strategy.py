@@ -1,5 +1,4 @@
 import os
-import pickle
 import multiprocessing
 import subprocess
 import numpy as np
@@ -8,7 +7,7 @@ import numpy as np
 npop = 1      # population size
 sigma = 0.1    # noise standard deviation
 alpha = 0.001  # learning rate
-iteration = 4
+iteration = 1
 nprocess = 4  # number of process
 chunksize = 4
 
@@ -36,7 +35,7 @@ class Layer:
         self.activation = activation
 
     def forward(self, input):
-        return self.activation(self.w * input + self.b)
+        return self.activation(self.w @ input + self.b)
 
     def __add__(self, other):
         ret = Layer(0, 0, self.activation)
@@ -72,10 +71,9 @@ class NN:
         self.layers = np.array(layers)
 
     def forward(self, input):
-        output = input
         for layer in self.layers:
-            output = layer.forward(input)
-        return output
+            input = layer.forward(input)
+        return input
 
     def __add__(self, other):  # overload list.__add__
         if type(other) is NN:
@@ -122,30 +120,34 @@ def processData(mapStr):
     return np.fromiter((blockHash[block] for block in mapStr), int)  # 120*40
 
 
-NNClass = NN
-
-
-def predict(mapStr, filename):
-    print(NNClass)
-    input = processData(mapStr)
-    with open(filename.decode('ascii'), 'rb') as f:
-        print(filename.decode('ascii'))
-        nn = pickle.load(f)
-    result = nn.forward(input)  # U D L R
+def predict(nn, map):
+    assert len(map) == 120*40
+    result = nn.forward(map)  # U D L R
     ret = np.argmax(result) + 1  # +1 for pyb0X901XXX.h::getMove
-    print(ret)
     return ret
     # return np.random.choice(range(1, 5), p=result/np.sum(result)) # sample based on weight
 
 
 def reward(nn):
-    assert type(nn) is NN
-    filename = 'data/{}'.format(id(nn))
-    with open(filename, 'wb') as f:
-        pickle.dump(nn, f)
-    subprocess.run(['./start', filename])
-    with open('test.csv', 'r') as f:
-        return int(f.read())
+    pipe = subprocess.Popen(
+        ['./start'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    it = 0
+    try:
+        while not pipe.returncode:
+            pipe.poll()
+            mapString = pipe.stdout.readline().strip()
+            if len(mapString) != 120*40:  # Snake is dead
+                pipe.stdin.write(bytes('{}\n'.format(0), 'ascii'))
+            else:
+                map = processData(mapString)
+                pipe.stdin.write(
+                    bytes('{}\n'.format(predict(nn, map)), 'ascii'))
+            pipe.stdin.flush()
+            it += 1
+        with open('test.csv', 'r') as f:
+            return int(f.read())
+    except:
+        return 0
 
 
 def train():
@@ -160,9 +162,13 @@ def train():
             pool.join()
         rewards = np.array(rewards)
         # rewards = np.fromiter(rewards, dtype=int)
-        A = (rewards - np.mean(rewards)) / np.std(rewards)  # standardize
+        std = np.std(rewards)
+        if std:
+            A = (rewards - np.mean(rewards)) / np.std(rewards)  # standardize
+        else:
+            A = (rewards - np.mean(rewards))
         weights += alpha/(npop*sigma) * \
-            np.sum(i*A for i, j in zip(noises.T, A))
+            np.sum([i*A for i, j in zip(noises.T, A)])  # prevent numpy warning
         print('Iteration end, max reward is', np.max(reward))
     with open('training_result.pickle', 'wb') as f:
         pickle.dump(weights, f)

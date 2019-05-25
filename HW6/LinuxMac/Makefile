@@ -1,9 +1,8 @@
-CXXFLAGS = -g -I../ncurses-5.9/include -I/usr/include/python3.6m -Wall -DNO_CURSES
-LDFLAGS = -L/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu
+CXXFLAGS = -g -I../ncurses-5.9/include -Wall -DNO_CURSES
 all: start
 
 start: basic.o Map.o PolicyMaker.o Game.o main.o
-	$(CXX) $(CXXFLAGS) $^ -o $@  $(LDFLAGS) -lcurses -lpython3.6m
+	$(CXX) $(CXXFLAGS) $^ -o $@ -lcurses
 basic.o: basic.cpp
 Map.o: Map.cpp
 PolicyMaker.o: PolicyMaker.cpp

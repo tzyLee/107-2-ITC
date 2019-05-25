@@ -4,40 +4,23 @@
 //!! TODO 1: modify the ifndef/define protection as your ID like
 //!"__pyb06901145_h__"
 
-#include <Python.h>
 #include <fstream>
 #include "../PolicyMaker.h"
 
 //!! TODO 2: please change the file name to your ID
 const char studentID[100] = "pyb06901145";
-extern PyObject* module;
-extern char* nnfilename;
 //!! TODO 3: rename your agent class name as "Agent_pyb06901145" with your own
 //! student ID
 class Agent_pyb06901145 : public PolicyMaker {
-   private:
-    PyObject* predictFunc;
-
    public:
     //!! TODO 4: put your student ID for the constructor of PolicyMaker (the
     //! base class)
     // you can have argument(s), but all these argument(s) must have their
     // default value
 
-    Agent_pyb06901145() : PolicyMaker("pyb06901145"), predictFunc(nullptr) {
-        if (!module) {
-            PyErr_Print();
-            return;
-        }
-        predictFunc = PyObject_GetAttrString(module, "predict");
-        if (!predictFunc) {
-            PyErr_Print();
-            std::cerr << "Cannot import predict from module\n";
-            return;
-        }
-    }
+    Agent_pyb06901145() : PolicyMaker("pyb06901145") {}
 
-    ~Agent_pyb06901145() { Py_DECREF(predictFunc); }
+    ~Agent_pyb06901145() {}
 
     Action getMove(int r) {
         // 2/6%: just go ahead
@@ -77,7 +60,10 @@ class Agent_pyb06901145 : public PolicyMaker {
         std::string mapString(120 * 40, '?');
         for (int i = 0; i < 7; ++i) {
             for (int j = 0; j < 7; ++j) {
-                mapString[upperLeft + 120 * i + j] = view[i * 7 + j];
+                int index = upperLeft + 120 * i + j;
+                if (index >= 0 &&
+                    index < 120 * 40)  // prevent from 'x' segfault
+                    mapString[upperLeft + 120 * i + j] = view[i * 7 + j];
             }
         }
         for (int i = 0; i < 120; ++i)
@@ -95,16 +81,15 @@ class Agent_pyb06901145 : public PolicyMaker {
             mapString[snake._body[0]] = '@';
         }
         mapString[headPos] = '+';  // Head of player itself
-        PyObject* action = PyObject_CallObject(
-            predictFunc, Py_BuildValue("(y,y)", mapString.c_str(), nnfilename));
-        if (!action) {
-            PyErr_Print();
-            std::cerr << "nullptr returned from prediction\n";
-            return getMove(0);
-        }
-        long res = PyLong_AsLong(action);
-        Py_DECREF(action);
-
+        // for (int i = 0; i < 40; ++i) {
+        //     for (int j = 0; j < 120; ++j)
+        //         std::cout << mapString[120 * i + j];
+        //     std::cout << '\n';
+        // }
+        std::cout << mapString << std::endl;
+        std::cout.flush();
+        int res = 0;
+        std::cin >> res;
         return getMove(res);
     }
 };
