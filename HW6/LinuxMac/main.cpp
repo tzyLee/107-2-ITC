@@ -1,12 +1,20 @@
+#include <cassert>
 #include <cstdlib>
 #include <ctime>
-#include <cwchar>
 
 #include "Game.h"
-Py_Object* module;
-int main() {
+PyObject* module;
+char* nnfilename;
+int main(int argc, char* argv[]) {
+    assert(argc > 1);
+    nnfilename = argv[1];
     Py_Initialize();
-    PySys_SetPath(L"TODO: absolute path to current dir");
+    PySys_SetPath(
+        L"/usr/lib/python36.zip:/usr/lib/python3.6:/usr/lib/python3.6/"
+        L"lib-dynload:/usr/local/lib/python3.6/dist-packages:/usr/lib/"
+        L"python3.6/dist-packages:/usr/lib/python3/dist-packages:/home/"
+        L"pythagordes/Desktop/IntroToCS/HW6/"
+        L"LinuxMac");
     PyObject* str = PyUnicode_FromString("evolution_strategy");
     if (!str) {
         PyErr_Print();
@@ -24,12 +32,11 @@ int main() {
     // TA: choose one of the following mode to start the game:
     // humanGame,singleGame,battleAll you are the green snake
 
-    game.singleGame(4, false);
-    Py_DECREF(module);
-    // game.humanGame(4,0,0);
+    // game.singleGame(4, false);
+    // game.humanGame(4, 0, 0);
     // TA: parameters: int randSeed=4,int aiAgent=0,int viewL=0
 
-    // game.battleAll("test.csv", true);
+    game.battleAll("test.csv", false);
     // TA: parameters: const char* dumpFileName,bool showGame=false
 
 #ifndef NO_CURSES
@@ -37,6 +44,7 @@ int main() {
     while (getch() != 'q') {
     }
 #endif
+    Py_DECREF(module);
     Py_Finalize();
     return 0;
 }

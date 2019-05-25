@@ -62,7 +62,18 @@ void Game::game_standard_init(int randSeed) {  // standard game
 
     // team 0: sankeNum=1,color: green
     // team 1: sankeNum=1,color: red
-
+#ifndef COLOR_RED
+#define COLOR_RED 1
+#endif
+#ifndef COLOR_GREEN
+#define COLOR_GREEN 2
+#endif
+#ifndef COLOR_YELLOW
+#define COLOR_YELLOW 3
+#endif
+#ifndef COLOR_BLUE
+#define COLOR_BLUE 4
+#endif
     teamMgr.clear();
     teamMgr.newTeam(COLOR_GREEN);
     teamMgr.newTeam(COLOR_YELLOW);
@@ -241,7 +252,7 @@ void Game::battleAll(const char* dumpFileName, bool showGame) {
             // int point = pSnakes[i]->_finalBodyLength * 10;
             agntsMgr.agentName.push_back(pAgents[i]->getName());
             agntsMgr.scores[i][i] += pSnakes[i]->_finalBodyLength * 10;
-            printw("Snake %d : %d points\n", i, agntsMgr.scores[i][i]);
+            // printw("Snake %d : %d points\n", i, agntsMgr.scores[i][i]);
         }
 
         // printw("Please press q to exit\n");

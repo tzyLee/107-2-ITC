@@ -50,24 +50,25 @@ class AgentsMgr {
     }
     void dump(const char* fileName) {
         FILE* pFile;
-        int size = pAllNewAgentFunc.size();
+        // int size = pAllNewAgentFunc.size();
 
         pFile = fopen(fileName, "w");
+        fprintf(pFile, "%d", scores[0][0]);
 
-        fprintf(pFile, "0 ,");
-        for (int i = 0; i < size; ++i) {
-            fprintf(pFile, "%s ,", agentName[i].c_str());
-        }
-        fprintf(pFile, "\n");
+        // fprintf(pFile, "0 ,");
+        // for (int i = 0; i < size; ++i) {
+        // fprintf(pFile, "%s ,", agentName[i].c_str());
+        // }
+        // fprintf(pFile, "\n");
 
-        for (int i = 0; i < size; ++i) {
-            fprintf(pFile, "%s ,", agentName[i].c_str());
-            for (int j = 0; j < size; ++j) {
-                // if(i==j)
-                fprintf(pFile, "%d ,", scores[i][j]);
-            }
-            fprintf(pFile, "\n");
-        }
+        // for (int i = 0; i < size; ++i) {
+        // fprintf(pFile, "%s ,", agentName[i].c_str());
+        // for (int j = 0; j < size; ++j) {
+        // if(i==j)
+        // fprintf(pFile, "%d ,", scores[i][j]);
+        // }
+        // fprintf(pFile, "\n");
+        // }
         fclose(pFile);
     }
 };

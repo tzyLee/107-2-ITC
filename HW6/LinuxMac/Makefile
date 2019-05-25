@@ -1,4 +1,4 @@
-CXXFLAGS = -g -I../ncurses-5.9/include -I/usr/include/python3.6m -Wall
+CXXFLAGS = -g -I../ncurses-5.9/include -I/usr/include/python3.6m -Wall -DNO_CURSES
 LDFLAGS = -L/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu
 all: start
 

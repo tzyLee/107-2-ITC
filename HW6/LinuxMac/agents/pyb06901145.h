@@ -11,6 +11,7 @@
 //!! TODO 2: please change the file name to your ID
 const char studentID[100] = "pyb06901145";
 extern PyObject* module;
+extern char* nnfilename;
 //!! TODO 3: rename your agent class name as "Agent_pyb06901145" with your own
 //! student ID
 class Agent_pyb06901145 : public PolicyMaker {
@@ -95,7 +96,7 @@ class Agent_pyb06901145 : public PolicyMaker {
         }
         mapString[headPos] = '+';  // Head of player itself
         PyObject* action = PyObject_CallObject(
-            predictFunc, Py_BuildValue("(y)", mapString.c_str()));
+            predictFunc, Py_BuildValue("(y,y)", mapString.c_str(), nnfilename));
         if (!action) {
             PyErr_Print();
             std::cerr << "nullptr returned from prediction\n";
