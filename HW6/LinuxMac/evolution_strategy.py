@@ -7,8 +7,8 @@ import numpy as np
 # hyperparameters
 npop = 20      # population size
 sigma = 0.1    # noise standard deviation
-alpha = 0.001  # learning rate
-iteration = 10
+alpha = 0.5  # learning rate
+iteration = 100
 nprocess = 4  # number of process
 chunksize = 4
 layers = [120*40, 128, 4]
@@ -47,7 +47,6 @@ def reward(layers):
     pipe = Popen(['./start'], stdout=PIPE, stdin=PIPE)
     while pipe.returncode is None:
         pipe.poll()
-        pipe.stdin.write(bytes('0\n', 'ascii'))
         mapString = pipe.stdout.readline().strip()
         if len(mapString) != 120*40:  # Snake is dead (Maybe)
             pipe.stdin.write(bytes('0\n', 'ascii'))
@@ -57,10 +56,18 @@ def reward(layers):
                 bytes('{}\n'.format(predict(layers, map)), 'ascii'))
         pipe.poll()
         if pipe.returncode is None:
-            pipe.stdin.flush()
+            try:
+                pipe.stdin.flush()
+            except:
+                pass
     if pipe.returncode == 0:
         with open('test.csv', 'r') as f:
-            return int(f.read())
+            num = f.read()
+            if num.isdecimal():
+                return int(num)
+            else:
+                print('Not a number,', num)
+                return 0
     print('Error')
     return 0
 
