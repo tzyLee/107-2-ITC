@@ -113,6 +113,16 @@ class Agent_b06901145 : public PolicyMaker {
             if (nearestFoodX > 3 && choice[3])
                 return Action::R_Act;
         }
+        // Early return the only possible move, preventing the rating being
+        // subtracted to zero
+        if (choice[0] && !choice[1] && !choice[2] && !choice[3])
+            return Action::U_Act;
+        if (!choice[0] && choice[1] && !choice[2] && !choice[3])
+            return Action::D_Act;
+        if (!choice[0] && !choice[1] && choice[2] && !choice[3])
+            return Action::L_Act;
+        if (!choice[0] && !choice[1] && !choice[2] && choice[3])
+            return Action::R_Act;
         // Rate choice based on number of safe blocks
         unsigned rating[4] = {0, 0, 0, 0};
         if (choice[0])
@@ -186,6 +196,24 @@ class Agent_b06901145 : public PolicyMaker {
             lowerBound += rating[2];
             if (choice[3] && lowerBound <= random)
                 return Action::R_Act;
+        } else {  // The sum may be all zero, but some choice are unsafe
+            int numOfPossible = choice[0] + choice[1] + choice[2] + choice[3];
+            unsigned random = (rand() % numOfPossible) + 1;
+            int actionIndex = 0;
+            for (int i = 0; i < 4; ++i)
+                if (choice[i]) {
+                    ++actionIndex;
+                    if (random == actionIndex)
+                        break;
+                }
+            if (actionIndex == 1)
+                return Action::U_Act;
+            if (actionIndex == 2)
+                return Action::D_Act;
+            if (actionIndex == 3)
+                return Action::L_Act;
+            if (actionIndex == 4)
+                return Action::R_Act;
         }
         return Action::R_Act;
     }
@@ -246,74 +274,6 @@ class Agent_b06901145 : public PolicyMaker {
                 return 0;
         }
     }
-    // bool safe(chtype map[49], Action action, int depth = 0) {
-    //     if (map[17] == 'x' || map[23] == 'x' || map[31] == 'x' ||
-    //         map[25] == 'x')
-    //         // base case, check until the block is unknown
-    //         return true;
-    //     if (depth > 3)
-    //         return true;
-    //     chtype newMap[49];
-    //     map[24] = '*';
-    //     switch (action) {
-    //         case Action::U_Act:
-    //             std::copy(&map[0], &map[42], &newMap[7]);
-    //             std::fill(&newMap[0], &newMap[7], 'x');
-    //             break;
-    //         case Action::D_Act:
-    //             std::copy(&map[7], &map[49], &newMap[0]);
-    //             std::fill(&newMap[42], &newMap[49], 'x');
-    //             break;
-    //         case Action::L_Act:
-    //             for (int i = 0; i < 7; ++i) {
-    //                 std::copy(&map[7 * i], &map[7 * i + 6], &newMap[7 * i +
-    //                 1]); newMap[7 * i] = 'x';
-    //             }
-    //             break;
-    //         case Action::R_Act:
-    //             for (int i = 0; i < 7; ++i) {
-    //                 std::copy(&map[7 * i + 1], &map[7 * (i + 1)],
-    //                           &newMap[7 * i]);
-    //                 newMap[7 * i + 6] = 'x';
-    //             }
-    //             break;
-    //         default:
-    //             map[24] = '@';
-    //             return false;
-    //     }
-    //     map[24] = newMap[24] = '@';
-    //     // Dead loop prevention
-    //     if (dangerous(map, 10) && dangerous(map, 16) && dangerous(map, 18))
-    //         return false;
-    //     if (dangerous(map, 30) && dangerous(map, 32) && dangerous(map, 38))
-    //         return false;
-    //     if (dangerous(map, 16) && dangerous(map, 22) && dangerous(map, 30))
-    //         return false;
-    //     if (dangerous(map, 18) && dangerous(map, 26) && dangerous(map, 32))
-    //         return false;
-    //     bool possible[4] = {
-    //         action != Action::D_Act && safe(newMap, Action::U_Act, depth +
-    //         1), action != Action::U_Act && safe(newMap, Action::D_Act, depth
-    //         + 1), action != Action::R_Act && safe(newMap, Action::L_Act,
-    //         depth + 1), action != Action::L_Act && safe(newMap,
-    //         Action::R_Act, depth + 1)};
-    //     switch (action) {
-    //         case Action::U_Act:
-    //             return possible[1] || possible[2] || possible[3];
-    //             break;
-    //         case Action::D_Act:
-    //             return possible[0] || possible[2] || possible[3];
-    //             break;
-    //         case Action::L_Act:
-    //             return possible[0] || possible[1] || possible[3];
-    //             break;
-    //         case Action::R_Act:
-    //             return possible[0] || possible[1] || possible[2];
-    //             break;
-    //         default:
-    //             return false;
-    //     }
-    // }
 };
 
 #endif  //__b06901145_h__
