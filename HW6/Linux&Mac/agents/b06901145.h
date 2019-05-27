@@ -13,17 +13,12 @@
 //!! TODO 2: rename your agent class name as "Agent_b06901145" with your own
 //! student ID
 class Agent_b06901145 : public PolicyMaker {
-   private:
-    unsigned _starvation;
-    int _lastBodyLength;
-
    public:
     //!! TODO 3: put your student ID for the constructor of PolicyMaker (the
     //! base class)
     // you can have argument(s), but all these argument(s) must have their
     // default value
-    Agent_b06901145()
-        : PolicyMaker("b06901145"), _starvation(0), _lastBodyLength(0) {}
+    Agent_b06901145() : PolicyMaker("b06901145") {}
 
     //{ ===== you can add any member functions and datas here =====
     // but don't use any static data!!!
@@ -71,9 +66,6 @@ class Agent_b06901145 : public PolicyMaker {
         // 28 29 30 31 32 33 34
         // 35 36 37 38 39 40 41
         // 42 43 44 45 46 47 48
-        // if (_lastBodyLength != pSnake->_finalBodyLength)
-        //     ++_starvation;
-
         bool choice[4] = {1, 1, 1, 1};  // U D L R
         getSnakeInView(3);
         getFoodInView(3);
@@ -112,26 +104,16 @@ class Agent_b06901145 : public PolicyMaker {
 
             nearestFoodX = 3 + (pq.top().pos % 120) - h_x;
             nearestFoodY = 3 + (pq.top().pos / 40) - h_y;
+            if (nearestFoodY < 3 && choice[0])
+                return Action::U_Act;
+            if (nearestFoodY > 3 && choice[1])
+                return Action::D_Act;
+            if (nearestFoodX < 3 && choice[2])
+                return Action::L_Act;
+            if (nearestFoodX > 3 && choice[3])
+                return Action::R_Act;
         }
-        if (nearestFoodY < 3 && choice[0])
-            return Action::U_Act;
-        if (nearestFoodY > 3 && choice[1])
-            return Action::D_Act;
-        if (nearestFoodX < 3 && choice[2])
-            return Action::L_Act;
-        if (nearestFoodX > 3 && choice[3])
-            return Action::R_Act;
-        // Starvation
-        // if (_starvation > 15) {
-        //     if (choice[3]) {
-        //         _starvation -= 5;
-        //         return Action::R_Act;
-        //     } else if (choice[1]) {
-        //         _starvation -= 5;
-        //         return Action::D_Act;
-        //     }
-        // }
-        // Rate choice based on number of dangerous block
+        // Rate choice based on number of safe blocks
         unsigned rating[4] = {0, 0, 0, 0};
         if (choice[0])
             rating[0] = rate(Action::U_Act);
@@ -141,22 +123,51 @@ class Agent_b06901145 : public PolicyMaker {
             rating[2] = rate(Action::L_Act);
         if (choice[3])
             rating[3] = rate(Action::R_Act);
+        // Move toward body-less area
+        int headX = pSnake->getHeadPos() % 120,
+            headY = pSnake->getHeadPos() / 120;
+        const int bodyBias = 1;
+        for (int i : pSnake->_body) {
+            int x = i % 120, y = i / 120;
+            if (x > headX)  // to the right of head
+                rating[3] = rating[3] > bodyBias ? rating[3] - bodyBias : 0;
+            else if (x < headX)  // to the left of head
+                rating[2] = rating[2] > bodyBias ? rating[2] - bodyBias : 0;
+            if (y > headY)  // to the bottom of head
+                rating[1] = rating[1] > bodyBias ? rating[1] - bodyBias : 0;
+            else if (y < headY)  // to the top of head
+                rating[0] = rating[0] > bodyBias ? rating[0] - bodyBias : 0;
+        }
+        for (const Snake& snake : SnakeinView) {
+            for (int i : snake._body) {
+                int x = i % 120, y = i / 120;
+                if (x > headX)  // to the right of head
+                    rating[3] = rating[3] > bodyBias ? rating[3] - bodyBias : 0;
+                else if (x < headX)  // to the left of head
+                    rating[2] = rating[2] > bodyBias ? rating[2] - bodyBias : 0;
+                if (y > headY)  // to the bottom of head
+                    rating[1] = rating[1] > bodyBias ? rating[1] - bodyBias : 0;
+                else if (y < headY)  // to the top of head
+                    rating[0] = rating[0] > bodyBias ? rating[0] - bodyBias : 0;
+            }
+        }
+        const int headBias = 10;
         // Player head detection
         if (view[16] == '@') {
-            rating[0] = rating[0] > 10 ? rating[0] - 10 : 0;
-            rating[2] = rating[2] > 10 ? rating[2] - 10 : 0;
+            rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
+            rating[2] = rating[2] > headBias ? rating[2] - headBias : 0;
         }
         if (view[18] == '@') {
-            rating[0] = rating[0] > 10 ? rating[0] - 10 : 0;
-            rating[3] = rating[3] > 10 ? rating[3] - 10 : 0;
+            rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
+            rating[3] = rating[3] > headBias ? rating[3] - headBias : 0;
         }
         if (view[30] == '@') {
-            rating[1] = rating[1] > 10 ? rating[1] - 10 : 0;
-            rating[2] = rating[2] > 10 ? rating[2] - 10 : 0;
+            rating[1] = rating[1] > headBias ? rating[1] - headBias : 0;
+            rating[2] = rating[2] > headBias ? rating[2] - headBias : 0;
         }
         if (view[32] == '@') {
-            rating[1] = rating[1] > 10 ? rating[1] - 10 : 0;
-            rating[3] = rating[3] > 10 ? rating[3] - 10 : 0;
+            rating[1] = rating[1] > headBias ? rating[1] - headBias : 0;
+            rating[3] = rating[3] > headBias ? rating[3] - headBias : 0;
         }
         int sum = rating[0] + rating[1] + rating[2] + rating[3];
         if (sum) {
