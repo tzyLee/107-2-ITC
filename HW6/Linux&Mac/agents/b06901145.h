@@ -89,13 +89,13 @@ class Agent_b06901145 : public PolicyMaker {
         if (choice[3] && !safe(&view[0], 4, 3))
             choice[3] = false;
         // Eat nearest food
-        int nearestFoodX = 3, nearestFoodY = 3;
         if (!FoodinView.empty()) {
+            int nearestFoodX = 3, nearestFoodY = 3;
             int pos = pSnake->getHeadPos();
-            int h_x = pos % 120, h_y = pos / 40;
+            int h_x = pos % 120, h_y = pos / 120;
             auto comp = [&](const Food& a, const Food& b) {
-                int a_dist_x = a.pos % 120 - h_x, a_dist_y = a.pos / 40 - h_y;
-                int b_dist_x = b.pos % 120 - h_x, b_dist_y = b.pos / 40 - h_y;
+                int a_dist_x = a.pos % 120 - h_x, a_dist_y = a.pos / 120 - h_y;
+                int b_dist_x = b.pos % 120 - h_x, b_dist_y = b.pos / 120 - h_y;
                 return a_dist_x * a_dist_x + a_dist_y * a_dist_y >
                        b_dist_x * b_dist_x + b_dist_y * b_dist_y;
             };
@@ -103,7 +103,7 @@ class Agent_b06901145 : public PolicyMaker {
                 comp, FoodinView);
 
             nearestFoodX = 3 + (pq.top().pos % 120) - h_x;
-            nearestFoodY = 3 + (pq.top().pos / 40) - h_y;
+            nearestFoodY = 3 + (pq.top().pos / 120) - h_y;
             if (nearestFoodY < 3 && choice[0])
                 return Action::U_Act;
             if (nearestFoodY > 3 && choice[1])
@@ -136,32 +136,42 @@ class Agent_b06901145 : public PolicyMaker {
         // Move toward body-less area
         int headX = pSnake->getHeadPos() % 120,
             headY = pSnake->getHeadPos() / 120;
-        const int bodyBias = 1;
+        const double bodyBias = 0.6;
+        unsigned bodyCount[4] = {0, 0, 0, 0};  // U D L R
         for (int i : pSnake->_body) {
             int x = i % 120, y = i / 120;
             if (x > headX)  // to the right of head
-                rating[3] = rating[3] > bodyBias ? rating[3] - bodyBias : 0;
+                ++bodyCount[3];
             else if (x < headX)  // to the left of head
-                rating[2] = rating[2] > bodyBias ? rating[2] - bodyBias : 0;
+                ++bodyCount[2];
             if (y > headY)  // to the bottom of head
-                rating[1] = rating[1] > bodyBias ? rating[1] - bodyBias : 0;
+                ++bodyCount[1];
             else if (y < headY)  // to the top of head
-                rating[0] = rating[0] > bodyBias ? rating[0] - bodyBias : 0;
+                ++bodyCount[0];
         }
         for (const Snake& snake : SnakeinView) {
             for (int i : snake._body) {
                 int x = i % 120, y = i / 120;
                 if (x > headX)  // to the right of head
-                    rating[3] = rating[3] > bodyBias ? rating[3] - bodyBias : 0;
+                    ++bodyCount[3];
                 else if (x < headX)  // to the left of head
-                    rating[2] = rating[2] > bodyBias ? rating[2] - bodyBias : 0;
+                    ++bodyCount[2];
                 if (y > headY)  // to the bottom of head
-                    rating[1] = rating[1] > bodyBias ? rating[1] - bodyBias : 0;
+                    ++bodyCount[1];
                 else if (y < headY)  // to the top of head
-                    rating[0] = rating[0] > bodyBias ? rating[0] - bodyBias : 0;
+                    ++bodyCount[0];
             }
         }
-        const int headBias = 10;
+        unsigned temp = 0;  // prevent unsigned integer underflow
+        temp = static_cast<unsigned>(bodyBias * bodyCount[0]);
+        rating[0] = rating[0] > temp ? rating[0] - temp : 0;
+        temp = static_cast<unsigned>(bodyBias * bodyCount[1]);
+        rating[1] = rating[1] > temp ? rating[1] - temp : 0;
+        temp = static_cast<unsigned>(bodyBias * bodyCount[2]);
+        rating[2] = rating[2] > temp ? rating[2] - temp : 0;
+        temp = static_cast<unsigned>(bodyBias * bodyCount[3]);
+        rating[3] = rating[3] > temp ? rating[3] - temp : 0;
+        const int headBias = 8;
         // Player head detection
         if (view[16] == '@') {
             rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
@@ -196,8 +206,10 @@ class Agent_b06901145 : public PolicyMaker {
             lowerBound += rating[2];
             if (choice[3] && lowerBound <= random)
                 return Action::R_Act;
-        } else {  // The sum may be all zero, but some choice are unsafe
-            int numOfPossible = choice[0] + choice[1] + choice[2] + choice[3];
+        }
+        // The sum may be all zero, but some choice are unsafe
+        int numOfPossible = choice[0] + choice[1] + choice[2] + choice[3];
+        if (numOfPossible) {
             unsigned random = (rand() % numOfPossible) + 1;
             int actionIndex = 0;
             for (int i = 0; i < 4; ++i)
