@@ -89,21 +89,23 @@ class Agent_b06901145 : public PolicyMaker {
         if (choice[3] && !safe(&view[0], 4, 3))  // Right
             choice[3] = false;
         // Eat nearest food
+        int pos = pSnake->getHeadPos();
+        int headX = pos % 120, headY = pos / 120;
         if (!FoodinView.empty()) {
             int nearestFoodX = 3, nearestFoodY = 3;
-            int pos = pSnake->getHeadPos();
-            int h_x = pos % 120, h_y = pos / 120;
             auto comp = [&](const Food& a, const Food& b) {
-                int a_dist_x = a.pos % 120 - h_x, a_dist_y = a.pos / 120 - h_y;
-                int b_dist_x = b.pos % 120 - h_x, b_dist_y = b.pos / 120 - h_y;
+                int a_dist_x = a.pos % 120 - headX,
+                    a_dist_y = a.pos / 120 - headY;
+                int b_dist_x = b.pos % 120 - headX,
+                    b_dist_y = b.pos / 120 - headY;
                 return a_dist_x * a_dist_x + a_dist_y * a_dist_y >
                        b_dist_x * b_dist_x + b_dist_y * b_dist_y;
             };
             std::priority_queue<Food, std::vector<Food>, decltype(comp)> pq(
                 comp, FoodinView);
 
-            nearestFoodX = 3 + (pq.top().pos % 120) - h_x;
-            nearestFoodY = 3 + (pq.top().pos / 120) - h_y;
+            nearestFoodX = 3 + (pq.top().pos % 120) - headX;
+            nearestFoodY = 3 + (pq.top().pos / 120) - headY;
             if (nearestFoodY < 3 && choice[0])
                 return Action::U_Act;
             if (nearestFoodY > 3 && choice[1])
@@ -134,11 +136,8 @@ class Agent_b06901145 : public PolicyMaker {
         if (choice[3])
             rating[3] = rate(Action::R_Act);
         // Move toward body-less area
-        int headX = pSnake->getHeadPos() % 120,
-            headY = pSnake->getHeadPos() / 120;
         const double bodyBias = 0.82;
         unsigned bodyCount[4] = {0, 0, 0, 0};  // U D L R
-        // TODO 設距離threshold，只有在某個範圍內才算
         for (int i : pSnake->_body) {
             int x = i % 120, y = i / 120;
             if (x > headX)  // to the right of head
