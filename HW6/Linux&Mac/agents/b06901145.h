@@ -71,26 +71,13 @@ class Agent_b06901145 : public PolicyMaker {
         // 28 29 30 31 32 33 34
         // 35 36 37 38 39 40 41
         // 42 43 44 45 46 47 48
-        if (_lastBodyLength != pSnake->_finalBodyLength)
-            ++_starvation;
+        // if (_lastBodyLength != pSnake->_finalBodyLength)
+        //     ++_starvation;
 
         bool choice[4] = {1, 1, 1, 1};  // U D L R
         getSnakeInView(3);
         getFoodInView(3);
         getView(3);
-        // for (auto& snake : SnakeinView) {
-        //     for (auto& pos : snake._body) {
-        //         std::cerr << pos << ' ';
-        //     }
-        //     std::cerr << '\n' << '\n';
-        // }
-
-        // for (int i = 0; i < 7; ++i) {
-        //     for (int j = 0; j < 7; ++j) {
-        //         std::cerr << static_cast<char>(view[7 * i + j]);
-        //     }
-        //     std::cerr << '\n';
-        // }
         // Avoid wall and snake
         if (dangerous(23))
             choice[2] = false;
@@ -135,15 +122,15 @@ class Agent_b06901145 : public PolicyMaker {
         if (nearestFoodX > 3 && choice[3])
             return Action::R_Act;
         // Starvation
-        if (_starvation > 15) {
-            if (choice[3]) {
-                _starvation -= 5;
-                return Action::R_Act;
-            } else if (choice[1]) {
-                _starvation -= 5;
-                return Action::D_Act;
-            }
-        }
+        // if (_starvation > 15) {
+        //     if (choice[3]) {
+        //         _starvation -= 5;
+        //         return Action::R_Act;
+        //     } else if (choice[1]) {
+        //         _starvation -= 5;
+        //         return Action::D_Act;
+        //     }
+        // }
         // Rate choice based on number of dangerous block
         unsigned rating[4] = {0, 0, 0, 0};
         if (choice[0])
@@ -156,20 +143,20 @@ class Agent_b06901145 : public PolicyMaker {
             rating[3] = rate(Action::R_Act);
         // Player head detection
         if (view[16] == '@') {
-            rating[0] = rating[0] > 5 ? rating[0] - 5 : 0;
-            rating[2] = rating[2] > 5 ? rating[2] - 5 : 0;
+            rating[0] = rating[0] > 10 ? rating[0] - 10 : 0;
+            rating[2] = rating[2] > 10 ? rating[2] - 10 : 0;
         }
         if (view[18] == '@') {
-            rating[0] = rating[0] > 5 ? rating[0] - 5 : 0;
-            rating[3] = rating[3] > 5 ? rating[3] - 5 : 0;
+            rating[0] = rating[0] > 10 ? rating[0] - 10 : 0;
+            rating[3] = rating[3] > 10 ? rating[3] - 10 : 0;
         }
         if (view[30] == '@') {
-            rating[1] = rating[1] > 5 ? rating[1] - 5 : 0;
-            rating[2] = rating[2] > 5 ? rating[2] - 5 : 0;
+            rating[1] = rating[1] > 10 ? rating[1] - 10 : 0;
+            rating[2] = rating[2] > 10 ? rating[2] - 10 : 0;
         }
         if (view[32] == '@') {
-            rating[1] = rating[1] > 5 ? rating[1] - 5 : 0;
-            rating[3] = rating[3] > 5 ? rating[3] - 5 : 0;
+            rating[1] = rating[1] > 10 ? rating[1] - 10 : 0;
+            rating[3] = rating[3] > 10 ? rating[3] - 10 : 0;
         }
         int sum = rating[0] + rating[1] + rating[2] + rating[3];
         if (sum) {

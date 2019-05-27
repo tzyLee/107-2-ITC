@@ -2,6 +2,7 @@
 #define __FOOD_H__
 
 #include <list>
+#include "Map.h"
 #include "basic.h"
 
 class Food {
