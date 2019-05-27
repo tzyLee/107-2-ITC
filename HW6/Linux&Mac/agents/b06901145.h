@@ -71,22 +71,22 @@ class Agent_b06901145 : public PolicyMaker {
         getFoodInView(3);
         getView(3);
         // Avoid wall and snake
-        if (dangerous(23))
-            choice[2] = false;
-        if (dangerous(31))
+        if (dangerous(17))  // Up
+            choice[0] = false;
+        if (dangerous(31))  // Down
             choice[1] = false;
-        if (dangerous(25))
+        if (dangerous(23))  // Left
+            choice[2] = false;
+        if (dangerous(25))  // Right
             choice[3] = false;
-        if (dangerous(17))
-            choice[0] = false;
         // Dead loop prevention (Only for nearby 7*7)
-        if (choice[0] && !safe(&view[0], 3, 2))
+        if (choice[0] && !safe(&view[0], 3, 2))  // Up
             choice[0] = false;
-        if (choice[1] && !safe(&view[0], 3, 4))
+        if (choice[1] && !safe(&view[0], 3, 4))  // Down
             choice[1] = false;
-        if (choice[2] && !safe(&view[0], 2, 3))
+        if (choice[2] && !safe(&view[0], 2, 3))  // Left
             choice[2] = false;
-        if (choice[3] && !safe(&view[0], 4, 3))
+        if (choice[3] && !safe(&view[0], 4, 3))  // Right
             choice[3] = false;
         // Eat nearest food
         if (!FoodinView.empty()) {
@@ -138,6 +138,7 @@ class Agent_b06901145 : public PolicyMaker {
             headY = pSnake->getHeadPos() / 120;
         const double bodyBias = 0.6;
         unsigned bodyCount[4] = {0, 0, 0, 0};  // U D L R
+        // TODO 設距離threshold，只有在某個範圍內才算
         for (int i : pSnake->_body) {
             int x = i % 120, y = i / 120;
             if (x > headX)  // to the right of head
@@ -173,6 +174,7 @@ class Agent_b06901145 : public PolicyMaker {
         rating[3] = rating[3] > temp ? rating[3] - temp : 0;
         const int headBias = 8;
         // Player head detection
+        // TODO 10, 22, 26, 38的蛇的頭的位置
         if (view[16] == '@') {
             rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
             rating[2] = rating[2] > headBias ? rating[2] - headBias : 0;
@@ -211,21 +213,23 @@ class Agent_b06901145 : public PolicyMaker {
         int numOfPossible = choice[0] + choice[1] + choice[2] + choice[3];
         if (numOfPossible) {
             unsigned random = (rand() % numOfPossible) + 1;
-            int actionIndex = 0;
-            for (int i = 0; i < 4; ++i)
-                if (choice[i]) {
+            int actionIndex = 0, ind = 0;
+            for (; ind < 4; ++ind)
+                if (choice[ind]) {
                     ++actionIndex;
                     if (random == actionIndex)
                         break;
                 }
-            if (actionIndex == 1)
-                return Action::U_Act;
-            if (actionIndex == 2)
-                return Action::D_Act;
-            if (actionIndex == 3)
-                return Action::L_Act;
-            if (actionIndex == 4)
-                return Action::R_Act;
+            if (random == actionIndex) {
+                if (ind == 0)
+                    return Action::U_Act;
+                if (ind == 1)
+                    return Action::D_Act;
+                if (ind == 2)
+                    return Action::L_Act;
+                if (ind == 3)
+                    return Action::R_Act;
+            }
         }
         return Action::R_Act;
     }
@@ -243,7 +247,7 @@ class Agent_b06901145 : public PolicyMaker {
     bool safe(chtype map[49], int x, int y) {
         if (dangerous(map, 7 * y + x))
             return false;
-        if (x == 0 || x == 7 || y == 0 || y == 7)
+        if (x == 0 || x == 6 || y == 0 || y == 6)
             return true;
         chtype temp = map[7 * y + x];
         map[7 * y + x] = '#';
