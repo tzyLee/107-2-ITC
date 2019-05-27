@@ -136,7 +136,7 @@ class Agent_b06901145 : public PolicyMaker {
         // Move toward body-less area
         int headX = pSnake->getHeadPos() % 120,
             headY = pSnake->getHeadPos() / 120;
-        const double bodyBias = 0.6;
+        const double bodyBias = 0.82;
         unsigned bodyCount[4] = {0, 0, 0, 0};  // U D L R
         // TODO 設距離threshold，只有在某個範圍內才算
         for (int i : pSnake->_body) {
