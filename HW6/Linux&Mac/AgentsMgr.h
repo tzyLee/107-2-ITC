@@ -50,7 +50,9 @@ class AgentsMgr {
     }
     void dump(const char* fileName) {
         // FILE* pFile;
-        std::ofstream ofs(pythonObjectID);
+        char temp[100] = "result/";
+        strcat(temp, pythonObjectID);
+        std::ofstream ofs(temp);
         // int size = pAllNewAgentFunc.size();
 
         // pFile = fopen(fileName, "w");

@@ -52,22 +52,16 @@ class Agent_pyb06901145 : public PolicyMaker {
         getView(3);
         // getSnakeInView(3);
         // getFoodInView(3);
-        char command[300] = "python pyb06901145.py '";
+        // char command[300] = "python pyb06901145.py '";
         for (int i = 0; i < 24; ++i)
-            command[len + i] = view[i];
+            std::cout << view[i];
         for (int i = 25; i < 49; ++i)
-            command[len + i - 1] = view[i];
-        command[len + 49 - 1] = '\'';
-        command[len + 50 - 1] = ' ';
-        command[len + 50] = '\0';
-        strcat(command, pythonObjectID);
-
-        char buffer[80] = "";
-        FILE* fp = popen(command, "r");
-        fgets(buffer, sizeof(buffer), fp);
-        pclose(fp);
-
-        return getMove((int)buffer[0] - 48);
+            std::cout << view[i];
+        std::cout << std::endl;  // send 49 chars
+        char temp = 10;
+        std::cin.get(temp);  // read 1 char
+        std::cerr << temp << std::endl;
+        return getMove(temp - 48);
     }
 };
 

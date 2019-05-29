@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 
     // game.humanGame(4,0,0);
     // TA: parameters: int randSeed=4,int aiAgent=0,int viewL=0
-    char filename[100] = "agents/";
+    char filename[100] = "./agents/result/";
     strcat(filename, pythonObjectID);
     game.battleAll(filename, false);
     // TA: parameters: const char* dumpFileName,bool showGame=false

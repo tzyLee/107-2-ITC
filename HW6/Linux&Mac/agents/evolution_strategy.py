@@ -1,6 +1,7 @@
 import os
 import multiprocessing
-import subprocess
+import shutil
+from subprocess import PIPE, Popen
 import pickle
 import numpy as np
 
@@ -13,15 +14,15 @@ blockList = [
     ' ',  # Empty
     '.'  # Food
 ]
-blockHash = {block: index for index, block in enumerate(blockList)}
+blockHash = {ord(block): index for index, block in enumerate(blockList)}
 eye = np.eye(len(blockList))
 WIDTH = 120
 HEIGHT = 40
 # hyperparameters
 npop = 20      # population size
 sigma = 0.1    # noise standard deviation
-alpha = 1.0  # learning rate
-iteration = 10
+alpha = 0.05  # learning rate
+iteration = 100
 nprocess = 4  # number of process
 chunksize = 4
 layers = [(7*7 - 1)*len(blockList), 128, 4]
@@ -34,11 +35,13 @@ def ReLU(array):
 
 def processData(mapStr):
     # 7*7 - 1
+    # assert len(mapStr) == 7*7-1, mapStr
     raw_data = np.fromiter((blockHash[block] for block in mapStr), int)
     return eye[raw_data].flatten()  # (7*7 - 1) * len(blockList)
 
 
 def predict(layers, map):
+    # assert len(map) == (7*7 - 1) * len(blockList)
     output = ReLU(layers[0] @ map + layers[1])
     output = ReLU(layers[2] @ output + layers[3])  # U D L R
     return np.argmax(output) + 1  # +1 for pyb0X901XXX.h::getMove
@@ -46,18 +49,34 @@ def predict(layers, map):
 
 
 def reward(layers):
-    with open('{}.pickle'.format(id(layers)), 'wb') as f:
-        pickle.dump(layers, f)
-    ret_code = subprocess.call(['../start', str(id(layers))])
-    assert ret_code == 0
-    with open("{}".format(id(layers)), 'r') as f:
+    reward_filename = str(id(layers))
+    with open('debug.log', 'a') as f, Popen(['../start', reward_filename], stdin=PIPE, stdout=PIPE, stderr=f) as p:
+        i = 0
+        while p.returncode is None:
+            # cannot use strip because ' ' may be in map
+            map = ''
+            map = p.stdout.read(49)[:48]
+            while not map and p.poll() is None:
+                map = p.stdout.read(49)[:48]
+            if p.poll() is not None:
+                break
+            map = processData(map)
+            action = predict(layers, map)
+            p.stdin.write(bytes(str(action), 'ascii'))
+            if p.poll() is None:
+                p.stdin.flush()
+    with open('result/{}'.format(reward_filename), 'r') as f:
         return int(f.read())
     return 0
 
 
 def train():
-    weights = np.array([np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
-                        np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])])
+    try:
+        with open('training_result.pickle', 'rb') as f:
+            weights = pickle.load(f)
+    except FileNotFoundError:
+        weights = np.array([np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
+                            np.random.randn(layers[2], layers[1]), np.random.randn(layers[2])])
     try:
         for i in range(iteration):
             noises = np.array([[np.random.randn(layers[1], layers[0]), np.random.randn(layers[1]),
@@ -81,6 +100,8 @@ def train():
     finally:
         with open('training_result.pickle', 'wb') as f:
             pickle.dump(weights, f)
+        shutil.rmtree('result')
+        os.makedirs('result')
 
 
 if __name__ == "__main__":
