@@ -4,7 +4,13 @@
 #include <cstdlib>
 #include <iostream>
 using namespace std;
-
+#ifdef NO_CURSES
+#define COLOR_WHITE 0
+#define COLOR_GREEN 0
+#define COLOR_YELLOW 1
+#define COLOR_RED 2
+#define COLOR_BLUE 3
+#endif
 void Game::curses_init() {
 #ifndef NO_CURSES
     initscr();
@@ -241,7 +247,7 @@ void Game::battleAll(const char* dumpFileName, bool showGame) {
             // int point = pSnakes[i]->_finalBodyLength * 10;
             agntsMgr.agentName.push_back(pAgents[i]->getName());
             agntsMgr.scores[i][i] += pSnakes[i]->_finalBodyLength * 10;
-            printw("Snake %d : %d points\n", i, agntsMgr.scores[i][i]);
+            // printw("Snake %d : %d points\n", i, agntsMgr.scores[i][i]);
         }
 
         // printw("Please press q to exit\n");

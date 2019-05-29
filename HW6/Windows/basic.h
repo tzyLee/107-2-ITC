@@ -12,17 +12,17 @@
 #ifndef NO_CURSES
 #include "curses.h"
 #else
-#include <ctime>
 #include <cstdio>
 #include <cstdlib>
-#include <string>
+#include <ctime>
 #include <iostream>
-
+#include <string>
 
 #define COLOR_WHITE 0
 #define COLOR_GREEN 0
 #define COLOR_YELLOW 1
 #define COLOR_RED 2
+#define COLOR_BLUE 3
 typedef char chtype;
 
 using namespace std;
@@ -38,6 +38,13 @@ inline void napms(int num) {
 }
 #endif
 
-enum Action { noAct = 0, U_Act = 1, D_Act = 2, L_Act = 3, R_Act = 4, ACC_Act = 5 };
+enum Action {
+    noAct = 0,
+    U_Act = 1,
+    D_Act = 2,
+    L_Act = 3,
+    R_Act = 4,
+    ACC_Act = 5
+};
 
 #endif  // __basic_h__

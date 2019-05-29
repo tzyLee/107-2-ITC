@@ -25,11 +25,11 @@ class AgentsMgr {
 
     AgentsMgr() {
         //!! TODO 3: add your agent class "Agent_b05901xxx" in a new push_back,
-        //!so TA can "new" your agent
+        //! so TA can "new" your agent
         // number of snakes should be 4 !!!
 
         pAllNewAgentFunc.push_back(
-            &fNewAgent<Agent_b06901145>);  // for c++ agent
+            &fNewAgent<Agent_pyb06901145>);  // for c++ agent
         // pAllNewAgentFunc.push_back(&fNewAgent<Agent_pyb06901145>);// for
         // python agent
 
@@ -49,26 +49,30 @@ class AgentsMgr {
         delete[] scores;
     }
     void dump(const char* fileName) {
-        FILE* pFile;
-        int size = pAllNewAgentFunc.size();
+        // FILE* pFile;
+        std::ofstream ofs(pythonObjectID);
+        // int size = pAllNewAgentFunc.size();
 
-        pFile = fopen(fileName, "w");
+        // pFile = fopen(fileName, "w");
 
-        fprintf(pFile, "0 ,");
-        for (int i = 0; i < size; ++i) {
-            fprintf(pFile, "%s ,", agentName[i].c_str());
-        }
-        fprintf(pFile, "\n");
+        // fprintf(pFile, "0 ,");
+        // for (int i = 0; i < size; ++i) {
+        //     fprintf(pFile, "%s ,", agentName[i].c_str());
+        // }
+        // fprintf(pFile, "\n");
 
-        for (int i = 0; i < size; ++i) {
-            fprintf(pFile, "%s ,", agentName[i].c_str());
-            for (int j = 0; j < size; ++j) {
-                // if(i==j)
-                fprintf(pFile, "%d ,", scores[i][j]);
-            }
-            fprintf(pFile, "\n");
-        }
-        fclose(pFile);
+        // for (int i = 0; i < size; ++i) {
+        //     fprintf(pFile, "%s ,", agentName[i].c_str());
+        //     for (int j = 0; j < size; ++j) {
+        //         // if(i==j)
+        //         fprintf(pFile, "%d ,", scores[i][j]);
+        //     }
+        //     fprintf(pFile, "\n");
+        // }
+        assert(ofs);
+        ofs << scores[0][0];
+        // fprintf(pFile, "%d", scores[0][0]);
+        // fclose(pFile);
     }
 };
 
