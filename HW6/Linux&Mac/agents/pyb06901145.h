@@ -60,7 +60,7 @@ class Agent_pyb06901145 : public PolicyMaker {
         std::cout << std::endl;  // send 49 chars
         char temp = 10;
         std::cin.get(temp);  // read 1 char
-        std::cerr << temp << std::endl;
+        // std::cerr << temp << std::endl;
         return getMove(temp - 48);
     }
 };

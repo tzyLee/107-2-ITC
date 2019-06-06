@@ -19,9 +19,9 @@ eye = np.eye(len(blockList))
 WIDTH = 120
 HEIGHT = 40
 # hyperparameters
-npop = 20      # population size
-sigma = 0.1    # noise standard deviation
-alpha = 0.05  # learning rate
+npop = 28      # population size
+sigma = 0.35    # noise standard deviation
+alpha = 2.5  # learning rate
 iteration = 100
 nprocess = 4  # number of process
 chunksize = 4
@@ -50,7 +50,8 @@ def predict(layers, map):
 
 def reward(layers):
     reward_filename = str(id(layers))
-    with open('debug.log', 'a') as f, Popen(['../start', reward_filename], stdin=PIPE, stdout=PIPE, stderr=f) as p:
+    # with open('debug.log', 'a') as f, Popen(['../start', reward_filename], stdin=PIPE, stdout=PIPE, stderr=f) as p:
+    with Popen(['../start', reward_filename], stdin=PIPE, stdout=PIPE) as p:
         i = 0
         while p.returncode is None:
             # cannot use strip because ' ' may be in map
@@ -65,9 +66,13 @@ def reward(layers):
             p.stdin.write(bytes(str(action), 'ascii'))
             if p.poll() is None:
                 p.stdin.flush()
-    with open('result/{}'.format(reward_filename), 'r') as f:
-        return int(f.read())
-    return 0
+    try:
+        with open('result/{}'.format(reward_filename), 'r') as f:
+            return int(f.read())
+    except:
+        with open('result/{}'.format(reward_filename), 'r') as f:
+            print(f.read())
+        return 0
 
 
 def train():

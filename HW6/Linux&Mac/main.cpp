@@ -7,6 +7,8 @@ const char* pythonObjectID = nullptr;
 int main(int argc, char* argv[]) {
     assert(argc > 1);
     pythonObjectID = argv[1];
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(0);
     Game game;
     // TA: choose one of the following mode to start the game:
     // humanGame,singleGame,battleAll you are the green snake
