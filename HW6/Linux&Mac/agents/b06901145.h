@@ -5,9 +5,8 @@
 //!"__b06901145_h__"
 
 #include <algorithm>
-#include <bitset>
+#include <array>
 #include <cassert>
-#include <cmath>
 #include <queue>
 #include <vector>
 #include "../PolicyMaker.h"
@@ -15,7 +14,7 @@
 //!! TODO 2: rename your agent class name as "Agent_b06901145" with your own
 //! student ID
 class Agent_b06901145 : public PolicyMaker {
-    std::bitset<40 * 120> map;  // false: safe, true: unsafe
+    std::array<bool, 40 * 120> map;  // false: safe, true: unsafe
 
    public:
     //!! TODO 3: put your student ID for the constructor of PolicyMaker (the
@@ -92,13 +91,12 @@ class Agent_b06901145 : public PolicyMaker {
             choice[2] = false;
         if (choice[3] && !safe(&view[0], 4, 3))  // Right
             choice[3] = false;
-        // TODO Dead loop prevention (full)
-        map.reset();  // set all bits to false (safe)
+        // Dead loop prevention (full)
+        map.fill(false);  // set all bits to false (safe)
         int pos = pSnake->getHeadPos();
         int headX = pos % 120, headY = pos / 120;
         // Get Body Info
         unsigned bodyCount[4] = {0, 0, 0, 0};  // U D L R
-        std::vector<int> body(std::move(pSnake->getBody()));
         for (int i : pSnake->_body) {
             int x = i % 120, y = i / 120;
             map[i] = true;
@@ -142,6 +140,16 @@ class Agent_b06901145 : public PolicyMaker {
             choice[2] = false;
         if (choice[3] && !noLoop(headX + 1, headY))
             choice[3] = false;
+        // Early return the only possible move, preventing the rating being
+        // subtracted to zero
+        if (choice[0] && !choice[1] && !choice[2] && !choice[3])
+            return Action::U_Act;
+        if (!choice[0] && choice[1] && !choice[2] && !choice[3])
+            return Action::D_Act;
+        if (!choice[0] && !choice[1] && choice[2] && !choice[3])
+            return Action::L_Act;
+        if (!choice[0] && !choice[1] && !choice[2] && choice[3])
+            return Action::R_Act;
         // Eat nearest food
         if (!FoodinView.empty()) {
             int nearestFoodX = 3, nearestFoodY = 3;
@@ -155,28 +163,20 @@ class Agent_b06901145 : public PolicyMaker {
             };
             std::priority_queue<Food, std::vector<Food>, decltype(comp)> pq(
                 comp, FoodinView);
-
-            nearestFoodX = 3 + (pq.top().pos % 120) - headX;
-            nearestFoodY = 3 + (pq.top().pos / 120) - headY;
-            if (nearestFoodY < 3 && choice[0])
-                return Action::U_Act;
-            if (nearestFoodY > 3 && choice[1])
-                return Action::D_Act;
-            if (nearestFoodX < 3 && choice[2])
-                return Action::L_Act;
-            if (nearestFoodX > 3 && choice[3])
-                return Action::R_Act;
+            while (!pq.empty()) {
+                nearestFoodX = 3 + (pq.top().pos % 120) - headX;
+                nearestFoodY = 3 + (pq.top().pos / 120) - headY;
+                if (nearestFoodY < 3 && choice[0])
+                    return Action::U_Act;
+                if (nearestFoodY > 3 && choice[1])
+                    return Action::D_Act;
+                if (nearestFoodX < 3 && choice[2])
+                    return Action::L_Act;
+                if (nearestFoodX > 3 && choice[3])
+                    return Action::R_Act;
+                pq.pop();
+            }
         }
-        // Early return the only possible move, preventing the rating being
-        // subtracted to zero
-        if (choice[0] && !choice[1] && !choice[2] && !choice[3])
-            return Action::U_Act;
-        if (!choice[0] && choice[1] && !choice[2] && !choice[3])
-            return Action::D_Act;
-        if (!choice[0] && !choice[1] && choice[2] && !choice[3])
-            return Action::L_Act;
-        if (!choice[0] && !choice[1] && !choice[2] && choice[3])
-            return Action::R_Act;
         // Rate choice based on number of safe blocks
         unsigned rating[4] = {0, 0, 0, 0};
         if (choice[0])
@@ -198,33 +198,44 @@ class Agent_b06901145 : public PolicyMaker {
         rating[2] = rating[2] > temp ? rating[2] - temp : 0;
         temp = static_cast<unsigned>(bodyBias * bodyCount[3]);
         rating[3] = rating[3] > temp ? rating[3] - temp : 0;
-        const int headBias = 8;
+        const int headBias = 20;
         // Player head detection
-        // TODO 10, 22, 26, 38的蛇的頭的位置
+        if (view[10] & 0xFF == '@') {
+            rating[1] = rating[1] ? rating[1] + headBias : 0;
+            rating[2] = rating[2] ? rating[2] + headBias : 0;
+            rating[3] = rating[3] ? rating[3] + headBias : 0;
+        }
+        if (view[38] & 0xFF == '@') {
+            rating[0] = rating[0] ? rating[0] + headBias : 0;
+            rating[2] = rating[2] ? rating[2] + headBias : 0;
+            rating[3] = rating[3] ? rating[3] + headBias : 0;
+        }
+        if (view[22] & 0xFF == '@') {
+            rating[0] = rating[0] ? rating[0] + headBias : 0;
+            rating[1] = rating[1] ? rating[1] + headBias : 0;
+            rating[3] = rating[3] ? rating[3] + headBias : 0;
+        }
+        if (view[26] & 0xFF == '@') {
+            rating[0] = rating[0] ? rating[0] + headBias : 0;
+            rating[1] = rating[1] ? rating[1] + headBias : 0;
+            rating[2] = rating[2] ? rating[2] + headBias : 0;
+        }
         if (view[16] & 0xFF == '@') {
-            rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
-            rating[2] = rating[2] > headBias ? rating[2] - headBias : 0;
+            rating[1] = rating[1] ? rating[0] + headBias : 0;
+            rating[3] = rating[3] ? rating[2] + headBias : 0;
         }
         if (view[18] & 0xFF == '@') {
-            rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
-            rating[3] = rating[3] > headBias ? rating[3] - headBias : 0;
+            rating[1] = rating[1] ? rating[1] + headBias : 0;
+            rating[2] = rating[2] ? rating[2] + headBias : 0;
         }
         if (view[30] & 0xFF == '@') {
-            rating[1] = rating[1] > headBias ? rating[1] - headBias : 0;
-            rating[2] = rating[2] > headBias ? rating[2] - headBias : 0;
+            rating[0] = rating[0] ? rating[0] + headBias : 0;
+            rating[3] = rating[3] ? rating[3] + headBias : 0;
         }
         if (view[32] & 0xFF == '@') {
-            rating[1] = rating[1] > headBias ? rating[1] - headBias : 0;
-            rating[3] = rating[3] > headBias ? rating[3] - headBias : 0;
+            rating[0] = rating[0] ? rating[0] + headBias : 0;
+            rating[2] = rating[2] ? rating[2] + headBias : 0;
         }
-        // Boost rating of certain direction when length is too small
-        // if (pSnake->_finalBodyLength < 6) {
-        //     for (int i = 3; i >= 0; --i)
-        //         if (choice[i]) {
-        //             rating[i] += 30;
-        //             break;
-        //         }
-        // }
         int sum = rating[0] + rating[1] + rating[2] + rating[3];
         if (sum) {
             unsigned random = rand() % sum, lowerBound = 0;
@@ -273,12 +284,12 @@ class Agent_b06901145 : public PolicyMaker {
         return view.isWall(pos) || block == '*' || block == '@';
     }
 
-    bool dangerous(chtype map[49], int pos) {
+    bool dangerous(chtype map[49], int pos) const {
         char block = map[pos] & 0xFF;
         return block == '#' || block == '*' || block == '@';
     }
 
-    bool safe(chtype map[49], int x, int y) {
+    bool safe(chtype map[49], int x, int y) const {
         if (dangerous(map, 7 * y + x))
             return false;
         if (x == 0 || x == 6 || y == 0 || y == 6)
@@ -319,19 +330,18 @@ class Agent_b06901145 : public PolicyMaker {
                         if (!dangerous(7 * i + j))
                             ++count;
                 return count;
-
             default:
                 return 0;
         }
     }
 
-    bool noLoop(int headX, int headY) {
-        std::bitset<40 * 120> temp = map;
-        int area = 0;
+    bool noLoop(int headX, int headY) const {
+        std::array<bool, 40 * 120> temp = map;
         return countByFlooding(headX, headY, temp) >= pSnake->_finalBodyLength;
     }
 
-    int countByFlooding(int x, int y, std::bitset<120 * 40>& tempMap) const {
+    int countByFlooding(int x, int y,
+                        std::array<bool, 120 * 40>& tempMap) const {
         if (x == 0 || x == 119 || y == 0 || y == 39)  // out of bound
             return 0;
         int area = 0;
