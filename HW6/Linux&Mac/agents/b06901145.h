@@ -134,13 +134,13 @@ class Agent_b06901145 : public PolicyMaker {
             map[120 * i] = true;
             map[120 * (i + 1) - 1] = true;
         }
-        if (choice[0] && !noLoop(headX, headY, Action::U_Act, body))
+        if (choice[0] && !noLoop(headX, headY - 1))
             choice[0] = false;
-        if (choice[1] && !noLoop(headX, headY, Action::D_Act, body))
+        if (choice[1] && !noLoop(headX, headY + 1))
             choice[1] = false;
-        if (choice[2] && !noLoop(headX, headY, Action::L_Act, body))
+        if (choice[2] && !noLoop(headX - 1, headY))
             choice[2] = false;
-        if (choice[3] && !noLoop(headX, headY, Action::R_Act, body))
+        if (choice[3] && !noLoop(headX + 1, headY))
             choice[3] = false;
         // Eat nearest food
         if (!FoodinView.empty()) {
@@ -325,142 +325,29 @@ class Agent_b06901145 : public PolicyMaker {
         }
     }
 
-    bool noLoop(int headX, int headY, Action action, std::vector<int>& body) {
-        int newX = headX, newY = headY;
+    bool noLoop(int headX, int headY) {
         std::bitset<40 * 120> temp = map;
-        int area[2] = {0, 0};  // L R or U D
-        switch (action) {
-            case Action::U_Act:
-                --newY;
-                if (body[1] % 120 != newX)  // Not three in a column
-                    return true;
-                area[0] = countByFlooding(newX - 1, newY);
-                map = temp;
-                area[1] = countByFlooding(newX + 1, newY);
-                map = temp;
-                break;
-            case Action::D_Act:
-                ++newY;
-                if (body[1] % 120 != newX)  // Not three in a column
-                    return true;
-                area[0] = countByFlooding(newX - 1, newY);
-                map = temp;
-                area[1] = countByFlooding(newX + 1, newY);
-                map = temp;
-                break;
-            case Action::L_Act:
-                --newX;
-                if (body[1] / 120 != newY)  // Not three in a row
-                    return true;
-                area[0] = countByFlooding(newX, newY - 1);
-                map = temp;
-                area[1] = countByFlooding(newX, newY + 1);
-                map = temp;
-                break;
-            case Action::R_Act:
-                ++newX;
-                if (body[1] / 120 != newY)  // Not three in a row
-                    return true;
-                area[0] = countByFlooding(newX, newY - 1);
-                map = temp;
-                area[1] = countByFlooding(newX, newY + 1);
-                map = temp;
-                break;
-            default:
-                break;
-        }
-        if (area[0] == area[1])
-            return true;
-        if (area[0] == 0) {
-            Action direction =
-                action == Action::U_Act || action == Action::D_Act
-                    ? Action::R_Act
-                    : Action::D_Act;
-            return canMove(newX, newY, direction, body, area[1]);
-        } else if (area[1] == 0) {
-            Action direction =
-                action == Action::U_Act || action == Action::D_Act
-                    ? Action::L_Act
-                    : Action::U_Act;
-            return canMove(newX, newY, direction, body, area[0]);
-        } else {
-            Action direction =
-                area[0] < area[1]
-                    ? (action == Action::U_Act || action == Action::D_Act
-                           ? Action::R_Act
-                           : Action::D_Act)
-                    : (action == Action::U_Act || action == Action::D_Act
-                           ? Action::L_Act
-                           : Action::U_Act);
-            return canMove(newX, newY, direction, body,
-                           std::min(area[0], area[1]));
-        }
+        int area = 0;
+        return countByFlooding(headX, headY, temp) >= pSnake->_finalBodyLength;
     }
 
-    int countByFlooding(int x, int y) {
+    int countByFlooding(int x, int y, std::bitset<120 * 40>& tempMap) const {
         if (x == 0 || x == 119 || y == 0 || y == 39)  // out of bound
             return 0;
         int area = 0;
-        if (!map[120 * y + x]) {
-            map[120 * y + x] = true;
+        if (!tempMap[120 * y + x]) {
+            tempMap[120 * y + x] = true;
             ++area;
         }
-        if (!map[120 * y + x + 1])
-            area += countByFlooding(x + 1, y);
-        if (!map[120 * y + x - 1])
-            area += countByFlooding(x - 1, y);
-        if (!map[120 * (y + 1) + x])
-            area += countByFlooding(x, y + 1);
-        if (!map[120 * (y - 1) + x])
-            area += countByFlooding(x, y - 1);
+        if (!tempMap[120 * y + x + 1])
+            area += countByFlooding(x + 1, y, tempMap);
+        if (!tempMap[120 * y + x - 1])
+            area += countByFlooding(x - 1, y, tempMap);
+        if (!tempMap[120 * (y + 1) + x])
+            area += countByFlooding(x, y + 1, tempMap);
+        if (!tempMap[120 * (y - 1) + x])
+            area += countByFlooding(x, y - 1, tempMap);
         return area;
-    }
-
-    bool canMove(int headX, int headY, Action action, std::vector<int>& body,
-                 int limit) {
-        if (limit <= 0)
-            return true;
-        int newX = headX, newY = headY;
-        switch (action) {
-            case Action::U_Act:
-                --newY;
-                break;
-            case Action::D_Act:
-                ++newY;
-                break;
-            case Action::L_Act:
-                --newX;
-                break;
-            case Action::R_Act:
-                ++newX;
-                break;
-            default:
-                break;
-        }
-        if (newX == 0 || newX == 119 || newY == 0 ||
-            newY == 39)  // out of bound
-            return false;
-        int newPos = 120 * newY + newX;
-        int prevTailPos = body.back();
-        map[newPos] = true;  // move to newPos, set to dangerous (head)
-        map[prevTailPos] = false;
-        body.pop_back();
-        body.insert(body.cbegin(), newPos);
-        // Check all direction(Recursion)
-        bool isSafe = map[newPos - 120] &&
-                          canMove(newX, newY, Action::U_Act, body, limit - 1) ||
-                      map[newPos + 120] &&
-                          canMove(newX, newY, Action::D_Act, body, limit - 1) ||
-                      map[newPos - 1] &&
-                          canMove(newX, newY, Action::L_Act, body, limit - 1) ||
-                      map[newPos + 1] &&
-                          canMove(newX, newY, Action::R_Act, body, limit - 1);
-        // Restore head position, add tail back
-        map[newPos] = false;
-        map[prevTailPos] = true;
-        body.erase(body.cbegin());
-        body.push_back(prevTailPos);
-        return isSafe;
     }
 };
 
