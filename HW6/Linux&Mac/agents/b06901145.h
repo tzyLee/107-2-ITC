@@ -5,20 +5,24 @@
 //!"__b06901145_h__"
 
 #include <algorithm>
+#include <bitset>
 #include <cassert>
 #include <cmath>
 #include <queue>
+#include <vector>
 #include "../PolicyMaker.h"
 
 //!! TODO 2: rename your agent class name as "Agent_b06901145" with your own
 //! student ID
 class Agent_b06901145 : public PolicyMaker {
+    std::bitset<40 * 120> map;  // false: safe, true: unsafe
+
    public:
     //!! TODO 3: put your student ID for the constructor of PolicyMaker (the
     //! base class)
     // you can have argument(s), but all these argument(s) must have their
     // default value
-    Agent_b06901145() : PolicyMaker("b06901145") {}
+    Agent_b06901145() : PolicyMaker("b06901145"), map() {}
 
     //{ ===== you can add any member functions and datas here =====
     // but don't use any static data!!!
@@ -88,9 +92,67 @@ class Agent_b06901145 : public PolicyMaker {
             choice[2] = false;
         if (choice[3] && !safe(&view[0], 4, 3))  // Right
             choice[3] = false;
-        // Eat nearest food
+        // TODO Dead loop prevention (full)
+        map.reset();  // set all bits to false (safe)
         int pos = pSnake->getHeadPos();
         int headX = pos % 120, headY = pos / 120;
+        // Get Body Info
+        unsigned bodyCount[4] = {0, 0, 0, 0};  // U D L R
+        int bounds[4] = {40, 0, 120, 0};       // U D L R
+        std::vector<int> body(std::move(pSnake->getBody()));
+        for (int i : pSnake->_body) {
+            int x = i % 120, y = i / 120;
+            map[i] = true;
+            if (x < bounds[2])
+                bounds[2] = x;
+            else if (x > bounds[3])
+                bounds[3] = x;
+            if (y < bounds[0])
+                bounds[0] = y;
+            else if (y > bounds[1])
+                bounds[1] = y;
+            if (x > headX)  // to the right of head
+                ++bodyCount[3];
+            else if (x < headX)  // to the left of head
+                ++bodyCount[2];
+            if (y > headY)  // to the bottom of head
+                ++bodyCount[1];
+            else if (y < headY)  // to the top of head
+                ++bodyCount[0];
+        }
+        assert(map[pos]);  // TODO the position of head must be unsafe
+        for (const Snake& snake : SnakeinView) {
+            for (int i : snake._body) {
+                int x = i % 120, y = i / 120;
+                map[i] = true;
+                if (x > headX)  // to the right of head
+                    ++bodyCount[3];
+                else if (x < headX)  // to the left of head
+                    ++bodyCount[2];
+                if (y > headY)  // to the bottom of head
+                    ++bodyCount[1];
+                else if (y < headY)  // to the top of head
+                    ++bodyCount[0];
+            }
+        }
+        // Set wall to true
+        for (int i = 0; i < 120; ++i) {
+            map[i] = true;
+            map[120 * 39 + i] = true;
+        }
+        for (int i = 0; i < 40; ++i) {
+            map[120 * i] = true;
+            map[120 * (i + 1) - 1] = true;
+        }
+        if (choice[0] && !safe(headX, headY, Action::U_Act, bounds, body))
+            choice[0] = false;
+        if (choice[1] && !safe(headX, headY, Action::D_Act, bounds, body))
+            choice[1] = false;
+        if (choice[2] && !safe(headX, headY, Action::L_Act, bounds, body))
+            choice[2] = false;
+        if (choice[3] && !safe(headX, headY, Action::R_Act, bounds, body))
+            choice[3] = false;
+        // Eat nearest food
         if (!FoodinView.empty()) {
             int nearestFoodX = 3, nearestFoodY = 3;
             auto comp = [&](const Food& a, const Food& b) {
@@ -137,31 +199,6 @@ class Agent_b06901145 : public PolicyMaker {
             rating[3] = rate(Action::R_Act);
         // Move toward body-less area
         const double bodyBias = 0.82;
-        unsigned bodyCount[4] = {0, 0, 0, 0};  // U D L R
-        for (int i : pSnake->_body) {
-            int x = i % 120, y = i / 120;
-            if (x > headX)  // to the right of head
-                ++bodyCount[3];
-            else if (x < headX)  // to the left of head
-                ++bodyCount[2];
-            if (y > headY)  // to the bottom of head
-                ++bodyCount[1];
-            else if (y < headY)  // to the top of head
-                ++bodyCount[0];
-        }
-        for (const Snake& snake : SnakeinView) {
-            for (int i : snake._body) {
-                int x = i % 120, y = i / 120;
-                if (x > headX)  // to the right of head
-                    ++bodyCount[3];
-                else if (x < headX)  // to the left of head
-                    ++bodyCount[2];
-                if (y > headY)  // to the bottom of head
-                    ++bodyCount[1];
-                else if (y < headY)  // to the top of head
-                    ++bodyCount[0];
-            }
-        }
         unsigned temp = 0;  // prevent unsigned integer underflow
         temp = static_cast<unsigned>(bodyBias * bodyCount[0]);
         rating[0] = rating[0] > temp ? rating[0] - temp : 0;
@@ -174,22 +211,30 @@ class Agent_b06901145 : public PolicyMaker {
         const int headBias = 8;
         // Player head detection
         // TODO 10, 22, 26, 38的蛇的頭的位置
-        if (view[16] == '@') {
+        if (view[16] & 0xFF == '@') {
             rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
             rating[2] = rating[2] > headBias ? rating[2] - headBias : 0;
         }
-        if (view[18] == '@') {
+        if (view[18] & 0xFF == '@') {
             rating[0] = rating[0] > headBias ? rating[0] - headBias : 0;
             rating[3] = rating[3] > headBias ? rating[3] - headBias : 0;
         }
-        if (view[30] == '@') {
+        if (view[30] & 0xFF == '@') {
             rating[1] = rating[1] > headBias ? rating[1] - headBias : 0;
             rating[2] = rating[2] > headBias ? rating[2] - headBias : 0;
         }
-        if (view[32] == '@') {
+        if (view[32] & 0xFF == '@') {
             rating[1] = rating[1] > headBias ? rating[1] - headBias : 0;
             rating[3] = rating[3] > headBias ? rating[3] - headBias : 0;
         }
+        // Boost rating of certain direction when length is too small
+        // if (pSnake->_finalBodyLength < 6) {
+        //     for (int i = 3; i >= 0; --i)
+        //         if (choice[i]) {
+        //             rating[i] += 30;
+        //             break;
+        //         }
+        // }
         int sum = rating[0] + rating[1] + rating[2] + rating[3];
         if (sum) {
             unsigned random = rand() % sum, lowerBound = 0;
@@ -288,6 +333,69 @@ class Agent_b06901145 : public PolicyMaker {
             default:
                 return 0;
         }
+    }
+
+    bool safe(int headX, int headY, Action action, const int bounds[4],
+              std::vector<int>& body) {
+        int newX = headX, newY = headY;
+        switch (action) {
+            case Action::U_Act:
+                --newY;
+                break;
+            case Action::D_Act:
+                ++newY;
+                break;
+            case Action::L_Act:
+                --newX;
+                break;
+            case Action::R_Act:
+                ++newX;
+                break;
+            default:
+                break;
+        }
+        int newPos = 120 * newY + newX;
+        if (map[newPos])  // new position is not safe
+            return false;
+        if (newY <= bounds[0] || newY >= bounds[1] || newX <= bounds[2] ||
+            newX >= bounds[3])  // new position out of bound => can move
+                                // without run into snake itself
+            return true;
+        // Move head to action, remove tail, update bound
+        int prevTailPos = body.back();
+        map[newPos] = true;  // move to newPos, set to dangerous (head)
+        map[prevTailPos] = false;
+        body.pop_back();
+        body.insert(body.cbegin(), newPos);
+        int newBounds[4] = {40, 0, 120, 0};
+        // update bounds
+        for (int i : body) {
+            int x = i % 120, y = i / 120;
+            if (x < newBounds[2])
+                newBounds[2] = x;
+            else if (x > newBounds[3])
+                newBounds[3] = x;
+            if (y < newBounds[0])
+                newBounds[0] = y;
+            else if (y > newBounds[1])
+                newBounds[1] = y;
+        }
+        // Check all direction (Recursion)
+        // Restore head position, add tail back, restore bound
+        bool isSafe =
+            map[newPos - 120] &&
+                safe(newX, newY, Action::U_Act, newBounds, body) ||
+            map[newPos + 120] &&
+                safe(newX, newY, Action::D_Act, newBounds, body) ||
+            map[newPos - 1] &&
+                safe(newX, newY, Action::L_Act, newBounds, body) ||
+            map[newPos + 1] && safe(newX, newY, Action::R_Act, newBounds, body);
+        // clean up
+        map[newPos] = false;
+        map[prevTailPos] = true;
+        body.erase(body.cbegin());
+        body.push_back(prevTailPos);
+        return isSafe;
     }
 };
 
