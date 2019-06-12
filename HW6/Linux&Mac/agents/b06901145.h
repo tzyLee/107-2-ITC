@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <queue>
 #include <vector>
 #include "../PolicyMaker.h"
